@@ -10,6 +10,22 @@ const inp = { width:'100%', padding:11, border:'1.5px solid #e2ecf1', borderRadi
 const btn = { padding:'11px 18px', border:'none', borderRadius:11, background:'linear-gradient(135deg,#0fa7a3,#0b6f8e)', color:'#fff', fontWeight:600, fontSize:14.5, cursor:'pointer', fontFamily:'inherit' };
 const ghost = { ...btn, background:'#eef3f6', color:'#0b6f8e' };
 
+function Logo() {
+  return (
+    <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+      <svg width="34" height="34" viewBox="0 0 120 120" aria-hidden="true" style={{ display:'block', filter:'drop-shadow(0 5px 12px rgba(11,111,142,.3))' }}>
+        <defs><linearGradient id="rcg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#62d7d2"/><stop offset="1" stopColor="#0b6f8e"/></linearGradient></defs>
+        <rect x="8" y="8" width="104" height="104" rx="28" fill="url(#rcg)"/>
+        <circle cx="57" cy="55" r="29" fill="#fff"/>
+        <path d="M40 74 L34 93 L58 79 Z" fill="#fff"/>
+        <path d="M57 69c-9-6-17-11-17-19 0-5 4-8 8-8 4 0 7 2 9 6 2-4 5-6 9-6 4 0 8 3 8 8 0 8-8 13-17 19z" fill="#0b6f8e"/>
+        <path d="M95 20 l3 9 9 3 -9 3 -3 9 -3-9 -9-3 9-3 z" fill="#fff"/>
+      </svg>
+      <span style={{ fontWeight:800, fontSize:22, letterSpacing:'-.03em' }}><span style={{ color:'#0b6f8e' }}>Repu</span><span style={{ color:'#0fa7a3' }}>Care</span></span>
+    </div>
+  );
+}
+
 export default function DashboardClient({ email, business, feedback, requests, sub, appUrl }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -34,8 +50,8 @@ export default function DashboardClient({ email, business, feedback, requests, s
     <main style={{ maxWidth:1000, margin:'0 auto', padding:'24px 20px 60px', direction:'rtl' }}>
       <header style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:20 }}>
         <div>
-          <div style={{ fontWeight:900, fontSize:24, letterSpacing:'-.02em' }}>RepuCare</div>
-          <div style={{ color:'#586b74', fontSize:13 }}>{business.name} · {business.city} · {TYPES[business.business_type]||business.business_type}</div>
+          <Logo/>
+          <div style={{ color:'#586b74', fontSize:13, marginTop:6 }}>{business.name} · {business.city} · {TYPES[business.business_type]||business.business_type}</div>
         </div>
         <div style={{ display:'flex', gap:10, alignItems:'center' }}>
           <span style={{ fontSize:12, color:'#586b74', border:'1px solid #e2ecf1', borderRadius:999, padding:'5px 12px' }}>{planLabel}</span>
