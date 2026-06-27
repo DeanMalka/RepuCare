@@ -20,41 +20,51 @@ function Logo() {
 
 export default function Login() {
   const [email, setEmail] = useState('');
-  const [sent, setSent] = useState(false);
+  const [password, setPassword] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
-  async function send(e) {
+  const [sent, setSent] = useState(false);
+
+  async function signIn(e) {
     e.preventDefault();
+    setBusy(true); setErr('');
+    const supa = browserClient();
+    const { error } = await supa.auth.signInWithPassword({ email, password });
+    if (error) { setBusy(false); setErr('אימייל או סיסמה שגויים'); return; }
+    window.location.replace('/dashboard');
+  }
+
+  async function magic() {
+    if (!email) { setErr('הקלד אימייל קודם'); return; }
     setBusy(true); setErr('');
     const supa = browserClient();
     const { error } = await supa.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin + '/auth/callback' } });
     setBusy(false);
     if (error) setErr(error.message); else setSent(true);
   }
+
   const page = { minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', padding:'24px 16px', direction:'rtl', background:'radial-gradient(125% 125% at 50% 0%, #f4fafb 0%, #e7eff4 55%, #dde8ee 100%)' };
   const box = { width:'100%', maxWidth:400, padding:'34px 28px', background:'#fff', border:'1px solid #ebf2f6', borderRadius:24, boxShadow:'0 34px 80px -34px rgba(10,40,52,.4)' };
-  const inp = { width:'100%', padding:13, border:'1.5px solid #e2ecf1', borderRadius:12, fontSize:16, fontFamily:'inherit', marginTop:8, outline:'none', background:'#fbfdfe', color:'#15242c' };
-  const btn = { width:'100%', marginTop:14, padding:14, border:'none', borderRadius:14, background:'linear-gradient(135deg,#0fa7a3,#0b6f8e)', color:'#fff', fontWeight:700, fontSize:15.5, cursor:'pointer', fontFamily:'inherit', boxShadow:'0 14px 28px -12px rgba(11,111,142,.6)' };
+  const inp = { width:'100%', padding:13, border:'1.5px solid #e2ecf1', borderRadius:12, fontSize:16, fontFamily:'inherit', marginTop:6, marginBottom:12, outline:'none', background:'#fbfdfe', color:'#15242c' };
+  const btn = { width:'100%', marginTop:4, padding:14, border:'none', borderRadius:14, background:'linear-gradient(135deg,#0fa7a3,#0b6f8e)', color:'#fff', fontWeight:700, fontSize:15.5, cursor:'pointer', fontFamily:'inherit', boxShadow:'0 14px 28px -12px rgba(11,111,142,.6)' };
+
   return (
     <main style={page}><div style={box}>
       <Logo/>
       <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.55),transparent)', margin:'16px auto 18px', maxWidth:200 }}/>
-      {sent ? (
-        <div style={{ textAlign:'center' }}>
-          <div style={{ fontSize:42 }}>✉️</div>
-          <h2 style={{ fontSize:18, fontWeight:800, color:'#0a1c26', marginTop:8 }}>שלחנו לך קישור התחברות</h2>
-          <p style={{ color:'#586b74', marginTop:8, lineHeight:1.55 }}>בדוק את המייל ({email}) ופתח את הקישור מאותו דפדפן.<br/>לא רואה? בדוק גם בתיקיית הספאם.</p>
-        </div>
-      ) : (
-        <form onSubmit={send}>
-          <h2 style={{ fontSize:18, fontWeight:800, color:'#0a1c26', textAlign:'center', marginBottom:4 }}>כניסה לאזור האישי</h2>
-          <p style={{ color:'#586b74', fontSize:13.5, textAlign:'center', marginBottom:16 }}>נשלח לך קישור התחברות חד-פעמי למייל</p>
-          <label style={{ fontWeight:600, fontSize:14, color:'#15242c' }}>אימייל</label>
-          <input style={inp} type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="you@business.co.il" />
-          <button style={{ ...btn, opacity: busy?0.7:1 }} type="submit" disabled={busy}>{busy ? 'שולח…' : 'שלח לי קישור התחברות'}</button>
-          {err && <p style={{ color:'#d9534f', fontSize:13, marginTop:10, textAlign:'center' }}>{err}</p>}
-        </form>
-      )}
+      <h2 style={{ fontSize:18, fontWeight:800, color:'#0a1c26', textAlign:'center', marginBottom:16 }}>כניסה לאזור האישי</h2>
+      <form onSubmit={signIn}>
+        <label style={{ fontWeight:600, fontSize:14, color:'#15242c' }}>אימייל</label>
+        <input style={inp} type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="you@business.co.il" />
+        <label style={{ fontWeight:600, fontSize:14, color:'#15242c' }}>סיסמה</label>
+        <input style={inp} type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" />
+        <button style={{ ...btn, opacity: busy?0.7:1 }} type="submit" disabled={busy}>{busy ? 'מתחבר…' : 'התחבר'}</button>
+        {err && <p style={{ color:'#d9534f', fontSize:13, marginTop:10, textAlign:'center' }}>{err}</p>}
+      </form>
+      <div style={{ height:1, background:'#eef3f6', margin:'18px 0 12px' }}/>
+      {sent
+        ? <p style={{ color:'#586b74', fontSize:13, textAlign:'center' }}>שלחנו קישור למייל ✉️ (אם לא הגיע — השתמש בסיסמה)</p>
+        : <p style={{ textAlign:'center', fontSize:13, color:'#0b6f8e', cursor:'pointer' }} onClick={magic}>אין סיסמה? שלח לי קישור התחברות למייל</p>}
     </div></main>
   );
 }
