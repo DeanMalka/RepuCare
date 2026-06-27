@@ -11,6 +11,13 @@ const TYPES = {
   aesthetic: { emoji:'✨', title:'מרגישים מחודשים?',      sub:'איך הייתה החוויה ב' },
 };
 
+const QUESTIONS = [
+  ['service', 'שביעות רצון כללית מהשירות'],
+  ['staff', 'יחס ואדיבות הצוות'],
+  ['value', 'מחיר מול תמורה'],
+  ['timeliness', 'מהירות ועמידה בזמנים'],
+];
+
 function Logo() {
   return (
     <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:9}}>
@@ -29,33 +36,51 @@ function Logo() {
   );
 }
 
+function MiniStars({ value, onPick }) {
+  const [hov, setHov] = useState(0);
+  return (
+    <div style={{display:'flex',gap:4,direction:'ltr'}} onMouseLeave={()=>setHov(0)}>
+      {[1,2,3,4,5].map(n => {
+        const lit = n <= (hov || value);
+        return (
+          <span key={n} role="button" tabIndex={0} aria-label={n+' כוכבים'}
+            onMouseEnter={()=>setHov(n)} onClick={()=>onPick(n)}
+            style={{ fontSize:24, cursor:'pointer', lineHeight:1, userSelect:'none',
+                     color: lit ? '#f5b50a' : '#dde5ea', transition:'color .1s ease' }}>★</span>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function RatingClient({ token, name, type, google }) {
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
-  const [done, setDone] = useState(false);
+  const [step, setStep] = useState('stars'); // stars | survey | done
+  const [survey, setSurvey] = useState({ service:0, staff:0, value:0, timeliness:0 });
   const [body, setBody] = useState('');
   const [sending, setSending] = useState(false);
   const p = TYPES[type] || TYPES.dental;
 
-  async function pick(n) {
-    setRating(n);
-    if (n >= 4) {
-      try { await fetch('/api/rate', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ token, rating:n }) }); } catch(e){}
-      window.location.href = google;
-    }
-  }
-  async function sendFeedback() {
+  function pick(n) { setRating(n); setStep('survey'); }
+
+  async function submitAll() {
     setSending(true);
-    try { await fetch('/api/feedback', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ token, rating, body }) }); } catch(e){}
-    setDone(true);
+    try {
+      await fetch('/api/feedback', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ token, rating, body, survey }) });
+    } catch (e) {}
+    if (rating >= 4 && google) { window.location.href = google; return; }
+    setStep('done');
   }
 
   const page = { minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', padding:'24px 16px', background:'radial-gradient(125% 125% at 50% 0%, #f4fafb 0%, #e7eff4 55%, #dde8ee 100%)' };
-  const card = { width:'100%', maxWidth:400, background:'#fff', borderRadius:24, padding:'34px 26px 28px', textAlign:'center', boxShadow:'0 34px 80px -34px rgba(10,40,52,.4), 0 1px 0 rgba(255,255,255,.7) inset', border:'1px solid #ebf2f6' };
+  const card = { width:'100%', maxWidth:420, background:'#fff', borderRadius:24, padding:'34px 26px 28px', textAlign:'center', boxShadow:'0 34px 80px -34px rgba(10,40,52,.4), 0 1px 0 rgba(255,255,255,.7) inset', border:'1px solid #ebf2f6' };
   const goldRule = { height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.55),transparent)', margin:'17px auto 19px', maxWidth:210 };
-  const cta = { display:'block', width:'100%', background:'linear-gradient(135deg,#0fa7a3,#0b6f8e)', color:'#fff', padding:'14px', borderRadius:14, fontWeight:700, fontSize:15.5, border:'none', marginTop:12, cursor:'pointer', fontFamily:'inherit', boxShadow:'0 14px 28px -12px rgba(11,111,142,.6)' };
+  const cta = { display:'block', width:'100%', background:'linear-gradient(135deg,#0fa7a3,#0b6f8e)', color:'#fff', padding:'14px', borderRadius:14, fontWeight:700, fontSize:15.5, border:'none', marginTop:16, cursor:'pointer', fontFamily:'inherit', boxShadow:'0 14px 28px -12px rgba(11,111,142,.6)' };
+  const qrow = { display:'flex', alignItems:'center', justifyContent:'space-between', gap:10, padding:'11px 0', borderTop:'1px solid #eef3f6' };
 
-  if (done) return (
+  if (step === 'done') return (
     <main style={page}><div style={card}>
       <Logo/>
       <div style={goldRule}/>
@@ -69,33 +94,52 @@ export default function RatingClient({ token, name, type, google }) {
     <main style={page}><div style={card}>
       <Logo/>
       <div style={goldRule}/>
-      <div style={{fontSize:38,lineHeight:1,marginBottom:6}}>{p.emoji}</div>
-      <h1 style={{fontSize:23,fontWeight:800,color:'#0a1c26',letterSpacing:'-.02em'}}>{p.title}</h1>
-      <p style={{color:'#586b74',marginTop:9,fontSize:16}}>{p.sub}<b style={{color:'#15242c'}}>{name}</b>?</p>
 
-      <div style={{margin:'24px 0 4px',display:'flex',justifyContent:'center',gap:7,direction:'ltr'}} onMouseLeave={()=>setHover(0)}>
-        {[1,2,3,4,5].map(n => {
-          const lit = n <= (hover || rating);
-          return (
-            <span key={n} role="button" tabIndex={0} aria-label={n + ' כוכבים'}
-              onMouseEnter={()=>setHover(n)} onClick={()=>pick(n)}
-              style={{ fontSize:42, cursor:'pointer', lineHeight:1, userSelect:'none',
-                       color: lit ? '#f5b50a' : '#dde5ea',
-                       transform: lit ? 'scale(1.14)' : 'scale(1)',
-                       transition:'transform .13s ease, color .13s ease',
-                       textShadow: lit ? '0 5px 14px rgba(245,181,10,.45)' : 'none' }}>★</span>
-          );
-        })}
-      </div>
-      {rating === 0 && <p style={{fontSize:13,color:'#9bacb4',marginTop:10}}>בחרו דירוג מ-1 עד 5 כוכבים</p>}
+      {step === 'stars' && (
+        <>
+          <div style={{fontSize:38,lineHeight:1,marginBottom:6}}>{p.emoji}</div>
+          <h1 style={{fontSize:23,fontWeight:800,color:'#0a1c26',letterSpacing:'-.02em'}}>{p.title}</h1>
+          <p style={{color:'#586b74',marginTop:9,fontSize:16}}>{p.sub}<b style={{color:'#15242c'}}>{name}</b>?</p>
+          <div style={{margin:'24px 0 4px',display:'flex',justifyContent:'center',gap:7,direction:'ltr'}} onMouseLeave={()=>setHover(0)}>
+            {[1,2,3,4,5].map(n => {
+              const lit = n <= (hover || rating);
+              return (
+                <span key={n} role="button" tabIndex={0} aria-label={n + ' כוכבים'}
+                  onMouseEnter={()=>setHover(n)} onClick={()=>pick(n)}
+                  style={{ fontSize:42, cursor:'pointer', lineHeight:1, userSelect:'none',
+                           color: lit ? '#f5b50a' : '#dde5ea',
+                           transform: lit ? 'scale(1.14)' : 'scale(1)',
+                           transition:'transform .13s ease, color .13s ease',
+                           textShadow: lit ? '0 5px 14px rgba(245,181,10,.45)' : 'none' }}>★</span>
+              );
+            })}
+          </div>
+          <p style={{fontSize:13,color:'#9bacb4',marginTop:10}}>בחרו דירוג מ-1 עד 5 כוכבים</p>
+        </>
+      )}
 
-      {rating > 0 && rating <= 3 && (
-        <div style={{marginTop:16,textAlign:'right'}}>
-          <textarea value={body} onChange={e=>setBody(e.target.value)} rows={3} placeholder="ספרו לנו מה אפשר לשפר..."
-            style={{width:'100%',padding:13,border:'1.5px solid #e2ecf1',borderRadius:14,fontFamily:'inherit',fontSize:15,resize:'vertical',outline:'none',background:'#fbfdfe',color:'#15242c'}} />
-          <button style={{...cta, opacity: sending?0.7:1}} onClick={sendFeedback} disabled={sending}>{sending ? 'שולח…' : 'שלח פידבק פרטי'}</button>
-          <p style={{fontSize:11.5,color:'#9bacb4',marginTop:12,textAlign:'center'}}>🔒 הפידבק מגיע ישירות לעסק ולא מתפרסם.</p>
-        </div>
+      {step === 'survey' && (
+        <>
+          <h2 style={{fontSize:20,fontWeight:800,color:'#0a1c26'}}>עוד רגע — 4 שאלות קצרות 🙏</h2>
+          <p style={{color:'#586b74',marginTop:7,fontSize:14.5}}>הדירוג שלכם עוזר לעסק להשתפר. דרגו כל אחת מ-1 עד 5:</p>
+          <div style={{marginTop:14,textAlign:'right'}}>
+            {QUESTIONS.map(([k,label]) => (
+              <div key={k} style={qrow}>
+                <span style={{fontSize:14.5,color:'#15242c',fontWeight:500}}>{label}</span>
+                <MiniStars value={survey[k]} onPick={(n)=>setSurvey(s=>({ ...s, [k]:n }))} />
+              </div>
+            ))}
+          </div>
+          {rating > 0 && rating <= 3 && (
+            <textarea value={body} onChange={e=>setBody(e.target.value)} rows={3} placeholder="ספרו לנו מה אפשר לשפר…"
+              style={{width:'100%',marginTop:14,padding:13,border:'1.5px solid #e2ecf1',borderRadius:14,fontFamily:'inherit',fontSize:15,resize:'vertical',outline:'none',background:'#fbfdfe',color:'#15242c'}} />
+          )}
+          <button style={{...cta, opacity: sending?0.7:1}} onClick={submitAll} disabled={sending}>
+            {sending ? 'שולח…' : (rating >= 4 ? 'סיום — מעבר לגוגל ⭐' : 'שליחת פידבק')}
+          </button>
+          {rating >= 4 && <p style={{fontSize:11.5,color:'#9bacb4',marginTop:12}}>מועברים לכתיבת ביקורת בגוגל 🙌</p>}
+          {rating > 0 && rating <= 3 && <p style={{fontSize:11.5,color:'#9bacb4',marginTop:12}}>🔒 הפידבק מגיע ישירות לעסק ולא מתפרסם.</p>}
+        </>
       )}
     </div></main>
   );
