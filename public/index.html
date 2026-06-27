@@ -346,12 +346,54 @@ if(mock&&matchMedia('(pointer:fine)').matches&&!matchMedia('(prefers-reduced-mot
   mock.addEventListener('mouseleave',function(){card.style.transform='rotateY(0) rotateX(0)'});
 }
 </script>
+<style>
+.report-card{background:#fff;border:1px solid #e2ecf1;border-radius:20px;padding:26px 22px;box-shadow:0 30px 70px -34px rgba(10,40,52,.4);animation:rcfade .5s ease}
+@keyframes rcfade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.report-sec{padding:14px 0;border-top:1px solid #eef3f6}
+.report-sec:first-of-type{border-top:0}
+.report-sec h4{font-size:16px;color:#0b6f8e;margin:0 0 6px;font-weight:800}
+.report-sec p{margin:0;color:#3a4d56;line-height:1.65;font-size:15px}
+.report-stats{display:flex;gap:12px}
+.report-stat{flex:1;background:#f4fafb;border:1px solid #e2ecf1;border-radius:14px;padding:14px;text-align:center}
+.rs-val{font-size:26px;font-weight:900;color:#0a1c26}
+.rs-lab{font-size:12.5px;color:#6b7d85;margin-top:3px}
+.report-list{margin:6px 0 0;padding-inline-start:20px;color:#3a4d56;line-height:1.7;font-size:15px}
+.report-list li{margin-bottom:5px}
+.report-cta{margin-top:18px;padding-top:16px;border-top:2px solid #f0ead8;text-align:center}
+</style>
 <script>
-(function(){var f=document.querySelector('form[action*="formspree"]');if(!f)return;
-f.addEventListener('submit',function(e){e.preventDefault();
-var parts=[];f.querySelectorAll('input,textarea,select').forEach(function(x){if(x.value&&x.value.trim()){parts.push((x.placeholder||x.getAttribute('name')||'')+': '+x.value.trim());}});
-var msg=encodeURIComponent('היי! מעוניין/ת בבדיקת מוניטין חינם של RepuCare.\n'+parts.join('\n'));
-window.location.href='https://wa.me/972544773073?text='+msg;});})();
+(function(){
+  var f=document.querySelector('#audit form'); if(!f) return;
+  var wrap=f.closest('.formwrap');
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function waLink(name){var m=encodeURIComponent('היי, ראיתי את בדיקת המוניטין של RepuCare ל"'+(name||'')+'" ואני רוצה להתחיל את 45 הימים חינם.');return 'https://wa.me/972544773073?text='+m;}
+  function render(rep,name){
+    var h='<div class="report-card"><div style="text-align:center;margin-bottom:6px"><span class="eyebrow gold">בדיקת מוניטין · RepuCare</span><h3 style="margin:8px 0 0;font-size:23px;color:#0a1c26">'+esc(rep.businessName)+'</h3>'+(rep.address?'<p style="margin:4px 0 0;font-size:13px;color:#90a1a9">'+esc(rep.address)+'</p>':'')+'</div>';
+    (rep.sections||[]).forEach(function(s){
+      h+='<div class="report-sec">'; if(s.title)h+='<h4>'+esc(s.title)+'</h4>';
+      if(s.type==='stats'&&s.stats){h+='<div class="report-stats">';s.stats.forEach(function(st){h+='<div class="report-stat"><div class="rs-val">'+esc(st.value)+'</div><div class="rs-lab">'+esc(st.label)+'</div></div>';});h+='</div>';}
+      else if(s.type==='list'&&s.items){h+='<ul class="report-list">';s.items.forEach(function(it){h+='<li>'+esc(it)+'</li>';});h+='</ul>';}
+      else if(s.body){h+='<p>'+esc(s.body)+'</p>';}
+      h+='</div>';
+    });
+    h+='<div class="report-cta"><p style="font-weight:800;color:#0a1c26;margin-bottom:10px">רוצה שנעלה לך את המוניטין אוטומטית? 45 יום חינם, בלי התחייבות.</p><a class="btn btn-wa" style="width:100%;min-height:48px" href="'+waLink(name)+'">דברו איתנו בוואטסאפ →</a></div></div>';
+    wrap.innerHTML=h; wrap.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+  f.addEventListener('submit',function(e){
+    e.preventDefault();
+    var data={}; f.querySelectorAll('input,textarea,select').forEach(function(x){if(x.name)data[x.name]=(x.value||'').trim();});
+    var btn=f.querySelector('button[type=submit]'); var old=btn?btn.textContent:'';
+    if(btn){btn.disabled=true;btn.textContent='מכינים את הדוח שלך…';}
+    fetch('/api/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+      .then(function(r){return r.json();})
+      .then(function(res){ if(!res||!res.ok||!res.report)throw new Error('bad'); render(res.report,data.clinic||data.name); })
+      .catch(function(){
+        if(btn){btn.disabled=false;btn.textContent=old;}
+        var parts=[];Object.keys(data).forEach(function(k){if(data[k])parts.push(k+': '+data[k]);});
+        window.location.href='https://wa.me/972544773073?text='+encodeURIComponent('היי! מעוניין/ת בבדיקת מוניטין חינם של RepuCare.\n'+parts.join('\n'));
+      });
+  });
+})();
 </script>
 </body>
 </html>
