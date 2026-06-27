@@ -77,7 +77,7 @@ export default function RatingClient({ token, name, type, google }) {
         {[1,2,3,4,5].map(n => {
           const lit = n <= (hover || rating);
           return (
-            <span key={n} role="button" tabIndex={0} aria-label={`${n} כוכבים`}
+            <span key={n} role="button" tabIndex={0} aria-label={n + ' כוכבים'}
               onMouseEnter={()=>setHover(n)} onClick={()=>pick(n)}
               style={{ fontSize:42, cursor:'pointer', lineHeight:1, userSelect:'none',
                        color: lit ? '#f5b50a' : '#dde5ea',
@@ -87,7 +87,7 @@ export default function RatingClient({ token, name, type, google }) {
           );
         })}
       </div>
-      {rating === 0 && <p style={{fontSize:13,color:'#9bacb4',marginTop:10}}>בחרו דירוג מ‑1 עד 5 כוכבים</p>}
+      {rating === 0 && <p style={{fontSize:13,color:'#9bacb4',marginTop:10}}>בחרו דירוג מ-1 עד 5 כוכבים</p>}
 
       {rating > 0 && rating <= 3 && (
         <div style={{marginTop:16,textAlign:'right'}}>
@@ -97,6 +97,6 @@ export default function RatingClient({ token, name, type, google }) {
           <p style={{fontSize:11.5,color:'#9bacb4',marginTop:12,textAlign:'center'}}>🔒 הפידבק מגיע ישירות לעסק ולא מתפרסם.</p>
         </div>
       )}
-    </main>
+    </div></main>
   );
 }
