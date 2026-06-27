@@ -29,7 +29,7 @@ function Logo() {
   );
 }
 
-export default function DashboardClient({ email, business, feedback, requests, sub, appUrl }) {
+export default function DashboardClient({ email, business, feedback, requests, sub, appUrl, leads = [] }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   async function post(url, body, method='POST') {
@@ -48,6 +48,17 @@ export default function DashboardClient({ email, business, feedback, requests, s
   const ratingLink = (appUrl||'') + '/r/' + business.rating_token;
   const planLabel = sub ? (sub.status==='trialing' ? 'בתקופת ניסיון (45 יום)' : sub.status) : 'ללא מנוי פעיל';
   const page = { minHeight:'100vh', direction:'rtl', background:'radial-gradient(120% 90% at 50% 0%, #f4fafb 0%, #e9f1f5 45%, #e1ebf0 100%)', padding:'26px 18px 70px' };
+
+  const SURVEY_Q = [['q_service','שירות'],['q_staff','יחס הצוות'],['q_value','מחיר מול תמורה'],['q_timeliness','מהירות / זמנים']];
+  const surveyAvg = (k) => { const v = feedback.map(f=>f[k]).filter(n=>typeof n==='number'); return v.length ? (v.reduce((a,b)=>a+b,0)/v.length) : null; };
+  const surveyCount = feedback.filter(f => SURVEY_Q.some(([k])=>typeof f[k]==='number')).length;
+  function exportLeadsCsv() {
+    const head = ['תאריך','שם עסק','איש קשר','טלפון','דירוג','מס׳ ביקורות','סטטוס'];
+    const rows = leads.map(l => [new Date(l.created_at).toLocaleString('he-IL'), l.business_name||'', l.contact_name||'', l.contact_phone||'', l.google_rating==null?'':l.google_rating, l.google_reviews_count==null?'':l.google_reviews_count, l.status||'']);
+    const csv = [head, ...rows].map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\r\n');
+    const blob = new Blob(['﻿'+csv], { type:'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'repucare-leads.csv'; a.click(); URL.revokeObjectURL(url);
+  }
 
   return (
     <main style={page}>
@@ -116,6 +127,53 @@ export default function DashboardClient({ email, business, feedback, requests, s
       </div>
 
       <div style={card}>
+        <h3 style={h3}>תובנות מהסקר {surveyCount>0 && <span style={{ fontSize:12, color:MUTED, fontWeight:500 }}>· {surveyCount} תשובות</span>}</h3>
+        <div style={goldRule}/>
+        {surveyCount===0
+          ? <p style={{ color:MUTED, fontSize:14 }}>עדיין אין תשובות סקר. ברגע שלקוחות ידרגו, כאן יופיעו הציונים הממוצעים לכל שאלה — ותדע מה הם אוהבים ומה פחות.</p>
+          : <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(170px,1fr))', gap:12 }}>
+              {SURVEY_Q.map(([k,label])=>{ const a=surveyAvg(k); return (
+                <div key={k} style={{ background:'#f7fbfc', border:'1px solid #e7f0f3', borderRadius:14, padding:'12px 14px' }}>
+                  <div style={{ fontSize:13, color:MUTED }}>{label}</div>
+                  <div style={{ fontSize:22, fontWeight:800, color: a!=null && a<3.5 ? '#c0552d' : INK, marginTop:3 }}>{a!=null? a.toFixed(1) : '—'}<span style={{ fontSize:13, color:MUTED, fontWeight:500 }}> /5</span></div>
+                  <div style={{ height:6, background:'#e7f0f3', borderRadius:99, marginTop:7, overflow:'hidden' }}><div style={{ height:'100%', width:((a||0)/5*100)+'%', background:'linear-gradient(90deg,#0fa7a3,#0b6f8e)' }}/></div>
+                </div> ); })}
+            </div>}
+      </div>
+
+      <div style={card}>
+        <h3 style={h3}>לידים נכנסים {leads.length>0 && <span style={{ fontSize:12, color:'#fff', background:TEAL, borderRadius:999, padding:'2px 9px', marginInlineStart:6 }}>{leads.length}</span>}</h3>
+        <div style={goldRule}/>
+        {leads.length===0
+          ? <p style={{ color:MUTED, fontSize:14 }}>אין עדיין לידים. כל מי שממלא "בדיקת מוניטין חינם" בעמוד הנחיתה יופיע כאן אוטומטית.</p>
+          : <>
+            <div style={{ overflowX:'auto' }}>
+              <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13.5 }}>
+                <thead><tr style={{ color:MUTED }}>
+                  <th style={{ padding:'6px 8px', fontWeight:600, textAlign:'right' }}>עסק</th>
+                  <th style={{ padding:'6px 8px', fontWeight:600, textAlign:'right' }}>איש קשר</th>
+                  <th style={{ padding:'6px 8px', fontWeight:600, textAlign:'right' }}>טלפון</th>
+                  <th style={{ padding:'6px 8px', fontWeight:600, textAlign:'right' }}>גוגל</th>
+                  <th style={{ padding:'6px 8px', fontWeight:600, textAlign:'right' }}>תאריך</th>
+                </tr></thead>
+                <tbody>
+                  {leads.map(l=>(
+                    <tr key={l.id} style={{ borderTop:'1px solid #f0f5f7' }}>
+                      <td style={{ padding:'8px', color:INK, fontWeight:600 }}>{l.business_name}</td>
+                      <td style={{ padding:'8px', color:INK }}>{l.contact_name||'—'}</td>
+                      <td style={{ padding:'8px', color:PETROL, direction:'ltr', textAlign:'right' }}>{l.contact_phone||'—'}</td>
+                      <td style={{ padding:'8px', color:MUTED }}>{l.google_rating!=null? '★'+l.google_rating+' · '+(l.google_reviews_count==null?0:l.google_reviews_count) : '—'}</td>
+                      <td style={{ padding:'8px', color:MUTED, fontSize:12 }}>{new Date(l.created_at).toLocaleDateString('he-IL')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <button style={{ ...ghost, marginTop:12 }} onClick={exportLeadsCsv}>⬇ ייצוא CSV</button>
+          </>}
+      </div>
+
+      <div style={card}>
         <h3 style={h3}>הגדרות העסק</h3>
         <div style={goldRule}/>
         <Settings business={business} onSave={async (b)=>{ const r=await post('/api/business', b, 'PATCH'); if(r.ok) router.refresh(); else alert(r.error||'שגיאה'); }} busy={busy} />
@@ -125,7 +183,8 @@ export default function DashboardClient({ email, business, feedback, requests, s
         {sub && (sub.status==='trialing'||sub.status==='active')
           ? <p style={{ color:'#eafbf6', fontWeight:700, fontSize:15 }}>המנוי פעיל ✓ — {planLabel}</p>
           : <>
-              <p style={{ color:'rgba(255,255,255,.85)', marginBottom:12 }}>הפעל מנוי: 45 יום חינם, ואז ₪349/חודש. בלי התחייבות.</p>
+              <p style={{ color:'rgba(255,255,255,.92)', fontWeight:700, fontSize:15.5, marginBottom:4 }}>45 יום חינם — בלי התחייבות</p>
+              <p style={{ color:'rgba(255,255,255,.82)', marginBottom:14, fontSize:14 }}>ואז: ₪349 לחודש &nbsp;·&nbsp; או ₪3,560 לשנה <span style={{ color:'#ffe6a8', fontWeight:700 }}>(15% הנחה — חיסכון ₪628)</span></p>
               <button style={{ ...btn, background:'#fff', color:PETROL }} disabled={busy} onClick={async()=>{ const r=await post('/api/checkout'); if(r.url) window.location.href=r.url; else alert(r.error||'שגיאה'); }}>הפעל מנוי (45 יום חינם)</button>
             </>}
       </div>
