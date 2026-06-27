@@ -151,5 +151,5 @@ export async function POST(req) {
     // swallow — report is already built for the customer
   }
 
-  return NextResponse.json({ ok: true, report });
+  return NextResponse.json({ ok: true, report, _diag: matched ? { matched: true } : { matched: false, place } });
 }
