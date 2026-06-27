@@ -5,15 +5,18 @@ import { browserClient } from '../../lib/supabaseBrowser';
 
 const TYPES = { dental:'מרפאת שיניים', salon:'מספרה / ברבר', dog:'מספרת כלבים', garage:'מוסך', play:'משחקייה', event:'אולם אירועים', aesthetic:'אסתטיקה' };
 
-const card = { background:'#fff', border:'1px solid #e2ecf1', borderRadius:18, padding:22, boxShadow:'0 14px 36px -18px rgba(10,40,52,.22)', marginBottom:18 };
-const inp = { width:'100%', padding:11, border:'1.5px solid #e2ecf1', borderRadius:10, fontSize:15, fontFamily:'inherit', marginBottom:10 };
-const btn = { padding:'11px 18px', border:'none', borderRadius:11, background:'linear-gradient(135deg,#0fa7a3,#0b6f8e)', color:'#fff', fontWeight:600, fontSize:14.5, cursor:'pointer', fontFamily:'inherit' };
-const ghost = { ...btn, background:'#eef3f6', color:'#0b6f8e' };
+const INK = '#0a1c26', PETROL = '#0b6f8e', TEAL = '#0fa7a3', GOLD = '#c4a35a', MUTED = '#5a6b73';
+const card = { background:'#fff', border:'1px solid #eef3f6', borderRadius:20, padding:24, boxShadow:'0 18px 44px -26px rgba(10,40,52,.28)', marginBottom:18 };
+const inp = { width:'100%', padding:12, border:'1.5px solid #e2ecf1', borderRadius:12, fontSize:15, fontFamily:'inherit', marginBottom:10, outline:'none', background:'#fbfdfe', color:INK };
+const btn = { padding:'11px 18px', border:'none', borderRadius:12, background:'linear-gradient(135deg,#0fa7a3,#0b6f8e)', color:'#fff', fontWeight:700, fontSize:14.5, cursor:'pointer', fontFamily:'inherit', boxShadow:'0 12px 24px -12px rgba(11,111,142,.55)' };
+const ghost = { padding:'10px 16px', border:'1px solid #dfeaef', borderRadius:12, background:'#fff', color:PETROL, fontWeight:600, fontSize:14, cursor:'pointer', fontFamily:'inherit' };
+const goldRule = { height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'10px 0 16px' };
+const h3 = { fontSize:16, fontWeight:800, color:INK, letterSpacing:'-.01em' };
 
 function Logo() {
   return (
-    <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-      <svg width="34" height="34" viewBox="0 0 120 120" aria-hidden="true" style={{ display:'block', filter:'drop-shadow(0 5px 12px rgba(11,111,142,.3))' }}>
+    <div style={{ display:'flex', alignItems:'center', gap:9 }}>
+      <svg width="38" height="38" viewBox="0 0 120 120" aria-hidden="true" style={{ display:'block', filter:'drop-shadow(0 6px 14px rgba(11,111,142,.3))' }}>
         <defs><linearGradient id="rcg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#62d7d2"/><stop offset="1" stopColor="#0b6f8e"/></linearGradient></defs>
         <rect x="8" y="8" width="104" height="104" rx="28" fill="url(#rcg)"/>
         <circle cx="57" cy="55" r="29" fill="#fff"/>
@@ -21,7 +24,7 @@ function Logo() {
         <path d="M57 69c-9-6-17-11-17-19 0-5 4-8 8-8 4 0 7 2 9 6 2-4 5-6 9-6 4 0 8 3 8 8 0 8-8 13-17 19z" fill="#0b6f8e"/>
         <path d="M95 20 l3 9 9 3 -9 3 -3 9 -3-9 -9-3 9-3 z" fill="#fff"/>
       </svg>
-      <span style={{ fontWeight:800, fontSize:22, letterSpacing:'-.03em' }}><span style={{ color:'#0b6f8e' }}>Repu</span><span style={{ color:'#0fa7a3' }}>Care</span></span>
+      <span style={{ fontWeight:800, fontSize:23, letterSpacing:'-.03em' }}><span style={{ color:PETROL }}>Repu</span><span style={{ color:TEAL }}>Care</span></span>
     </div>
   );
 }
@@ -37,7 +40,6 @@ export default function DashboardClient({ email, business, feedback, requests, s
   }
   async function logout(){ await browserClient().auth.signOut(); router.push('/login'); }
 
-  // ---------- ONBOARDING ----------
   if (!business) {
     return <Onboard onCreate={async (b)=>{ const r=await post('/api/business', b); if(r.ok) router.refresh(); else alert(r.error||'שגיאה'); }} email={email} logout={logout} busy={busy} />;
   }
@@ -45,99 +47,112 @@ export default function DashboardClient({ email, business, feedback, requests, s
   const openFb = feedback.filter(f=>f.status==='new').length;
   const ratingLink = (appUrl||'') + '/r/' + business.rating_token;
   const planLabel = sub ? (sub.status==='trialing' ? 'בתקופת ניסיון (45 יום)' : sub.status) : 'ללא מנוי פעיל';
+  const page = { minHeight:'100vh', direction:'rtl', background:'radial-gradient(120% 90% at 50% 0%, #f4fafb 0%, #e9f1f5 45%, #e1ebf0 100%)', padding:'26px 18px 70px' };
 
   return (
-    <main style={{ maxWidth:1000, margin:'0 auto', padding:'24px 20px 60px', direction:'rtl' }}>
-      <header style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:20 }}>
+    <main style={page}>
+    <div style={{ maxWidth:1000, margin:'0 auto' }}>
+      <header style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:22, flexWrap:'wrap', gap:12 }}>
         <div>
           <Logo/>
-          <div style={{ color:'#586b74', fontSize:13, marginTop:6 }}>{business.name} · {business.city} · {TYPES[business.business_type]||business.business_type}</div>
+          <div style={{ color:MUTED, fontSize:13.5, marginTop:6 }}>{business.name} · {business.city} · {TYPES[business.business_type]||business.business_type}</div>
         </div>
         <div style={{ display:'flex', gap:10, alignItems:'center' }}>
-          <span style={{ fontSize:12, color:'#586b74', border:'1px solid #e2ecf1', borderRadius:999, padding:'5px 12px' }}>{planLabel}</span>
+          <span style={{ fontSize:12.5, color:PETROL, background:'#fff', border:'1px solid #dcebf0', borderRadius:999, padding:'6px 14px', fontWeight:600 }}>{planLabel}</span>
           <button style={ghost} onClick={logout}>יציאה</button>
         </div>
       </header>
 
-      {/* KPIs */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:14, marginBottom:18 }}>
-        <Kpi label="בקשות שנשלחו" value={requests.length} />
-        <Kpi label="פידבק פתוח לטיפול" value={openFb} />
-        <Kpi label="סטטוס מנוי" value={sub ? (sub.status==='trialing'?'ניסיון':'פעיל') : '—'} />
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:14, marginBottom:4 }}>
+        <Kpi label="בקשות שנשלחו" value={requests.length} accent={TEAL} />
+        <Kpi label="פידבק פתוח לטיפול" value={openFb} accent={GOLD} />
+        <Kpi label="סטטוס מנוי" value={sub ? (sub.status==='trialing'?'ניסיון':'פעיל') : '—'} accent={PETROL} />
       </div>
 
-      {/* Rating link / QR */}
       <div style={card}>
-        <h3 style={{ marginBottom:8, fontSize:16 }}>קישור הדירוג שלך</h3>
+        <h3 style={h3}>קישור הדירוג שלך</h3>
+        <div style={goldRule}/>
         <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
-          <input style={{ ...inp, marginBottom:0, flex:1, minWidth:240 }} readOnly value={ratingLink} />
-          <button style={ghost} onClick={()=>{navigator.clipboard&&navigator.clipboard.writeText(ratingLink); alert('הועתק');}}>העתק</button>
-          <a style={{ ...btn, textDecoration:'none' }} href={'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data='+encodeURIComponent(ratingLink)} target="_blank" rel="noreferrer">QR</a>
+          <input style={{ ...inp, marginBottom:0, flex:1, minWidth:240, direction:'ltr', textAlign:'left' }} readOnly value={ratingLink} />
+          <button style={ghost} onClick={()=>{navigator.clipboard&&navigator.clipboard.writeText(ratingLink); alert('הקישור הועתק');}}>העתק</button>
+          <a style={{ ...btn, textDecoration:'none', display:'inline-flex', alignItems:'center' }} href={'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(ratingLink)} target="_blank" rel="noreferrer">קוד QR</a>
         </div>
-        <p style={{ fontSize:12.5, color:'#586b74', marginTop:8 }}>תלו את ה-QR בעסק או שלחו את הקישור ללקוחות אחרי השירות.</p>
+        <p style={{ fontSize:12.5, color:MUTED, marginTop:10 }}>תלו את ה‑QR בעסק או שלחו את הקישור ללקוחות אחרי השירות. דירוג גבוה → גוגל, נמוך → פידבק פרטי אליכם.</p>
       </div>
 
-      {/* Send request */}
       <div style={card}>
-        <h3 style={{ marginBottom:12, fontSize:16 }}>שליחת בקשת ביקורת ללקוח</h3>
+        <h3 style={h3}>שליחת בקשת ביקורת ללקוח</h3>
+        <div style={goldRule}/>
         <SendRequest onSend={async (b)=>{ const r=await post('/api/requests', b); if(r.ok) router.refresh(); else alert(r.error||'שגיאה'); }} busy={busy} />
       </div>
 
-      {/* Feedback + Requests */}
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:18 }}>
         <div style={card}>
-          <h3 style={{ marginBottom:10, fontSize:16 }}>פידבק פרטי</h3>
-          {feedback.length===0 && <p style={{ color:'#586b74' }}>אין פידבק עדיין.</p>}
+          <h3 style={h3}>פידבק פרטי {openFb>0 && <span style={{ fontSize:12, color:'#fff', background:GOLD, borderRadius:999, padding:'2px 9px', marginInlineStart:6 }}>{openFb} חדש</span>}</h3>
+          <div style={goldRule}/>
+          {feedback.length===0 && <p style={{ color:MUTED, fontSize:14 }}>אין פידבק עדיין.</p>}
           {feedback.map(f=>(
-            <div key={f.id} style={{ padding:'10px 0', borderBottom:'1px solid #eef3f6' }}>
-              <div style={{ fontSize:14 }}>{f.body || '(ללא טקסט)'} {f.rating?`· ${f.rating}★`:''}</div>
-              <div style={{ fontSize:11.5, color:'#586b74', marginTop:3 }}>
+            <div key={f.id} style={{ padding:'11px 0', borderBottom:'1px solid #f0f5f7' }}>
+              <div style={{ fontSize:14, color:INK, lineHeight:1.5 }}>{f.body || '(ללא טקסט)'} {f.rating?<span style={{ color:GOLD, fontWeight:700 }}>· {f.rating}★</span>:''}</div>
+              <div style={{ fontSize:11.5, color:MUTED, marginTop:5 }}>
                 {f.status==='new'
-                  ? <button style={{ ...ghost, padding:'4px 10px', fontSize:12 }} onClick={async()=>{ await post('/api/business',{markFeedback:f.id},'PATCH'); router.refresh(); }}>סמן כטופל</button>
-                  : 'טופל'}
+                  ? <button style={{ ...ghost, padding:'4px 11px', fontSize:12 }} onClick={async()=>{ await post('/api/business',{markFeedback:f.id},'PATCH'); router.refresh(); }}>סמן כטופל</button>
+                  : <span style={{ color:TEAL, fontWeight:600 }}>✓ טופל</span>}
               </div>
             </div>
           ))}
         </div>
         <div style={card}>
-          <h3 style={{ marginBottom:10, fontSize:16 }}>בקשות אחרונות</h3>
-          {requests.length===0 && <p style={{ color:'#586b74' }}>עדיין לא נשלחו בקשות.</p>}
+          <h3 style={h3}>בקשות אחרונות</h3>
+          <div style={goldRule}/>
+          {requests.length===0 && <p style={{ color:MUTED, fontSize:14 }}>עדיין לא נשלחו בקשות.</p>}
           {requests.map(r=>(
-            <div key={r.id} style={{ display:'flex', justifyContent:'space-between', padding:'9px 0', borderBottom:'1px solid #eef3f6', fontSize:14 }}>
-              <span>{r.customer_name || r.contact || 'לקוח'}</span>
-              <span style={{ color:'#586b74', fontSize:12 }}>{r.status} · {r.channel}</span>
+            <div key={r.id} style={{ display:'flex', justifyContent:'space-between', padding:'10px 0', borderBottom:'1px solid #f0f5f7', fontSize:14 }}>
+              <span style={{ color:INK }}>{r.customer_name || r.contact || 'לקוח'}</span>
+              <span style={{ color:MUTED, fontSize:12 }}>{r.status} · {r.channel}</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Settings + Billing */}
       <div style={card}>
-        <h3 style={{ marginBottom:12, fontSize:16 }}>הגדרות</h3>
+        <h3 style={h3}>הגדרות העסק</h3>
+        <div style={goldRule}/>
         <Settings business={business} onSave={async (b)=>{ const r=await post('/api/business', b, 'PATCH'); if(r.ok) router.refresh(); else alert(r.error||'שגיאה'); }} busy={busy} />
       </div>
 
-      <div style={{ ...card, textAlign:'center' }}>
+      <div style={{ ...card, textAlign:'center', background:'linear-gradient(135deg,#0b2330,#0b6f8e)', border:'none' }}>
         {sub && (sub.status==='trialing'||sub.status==='active')
-          ? <p style={{ color:'#10936f', fontWeight:600 }}>המנוי פעיל ✓ ({planLabel})</p>
+          ? <p style={{ color:'#eafbf6', fontWeight:700, fontSize:15 }}>המנוי פעיל ✓ — {planLabel}</p>
           : <>
-              <p style={{ color:'#586b74', marginBottom:10 }}>הפעל מנוי: 45 יום חינם, ואז ₪349/חודש. בלי התחייבות.</p>
-              <button style={btn} disabled={busy} onClick={async()=>{ const r=await post('/api/checkout'); if(r.url) window.location.href=r.url; else alert(r.error||'שגיאה'); }}>הפעל מנוי (45 יום חינם)</button>
+              <p style={{ color:'rgba(255,255,255,.85)', marginBottom:12 }}>הפעל מנוי: 45 יום חינם, ואז ₪349/חודש. בלי התחייבות.</p>
+              <button style={{ ...btn, background:'#fff', color:PETROL }} disabled={busy} onClick={async()=>{ const r=await post('/api/checkout'); if(r.url) window.location.href=r.url; else alert(r.error||'שגיאה'); }}>הפעל מנוי (45 יום חינם)</button>
             </>}
       </div>
+
+      <p style={{ textAlign:'center', color:'#9fb0b8', fontSize:12, marginTop:18 }}>RepuCare · ניהול מוניטין לעסקי שירות</p>
+    </div>
     </main>
   );
 }
 
-function Kpi({ label, value }) {
-  return <div style={card}><div style={{ color:'#586b74', fontSize:12.5 }}>{label}</div><div style={{ fontSize:28, fontWeight:800, marginTop:4 }}>{value}</div></div>;
+function Kpi({ label, value, accent }) {
+  return (
+    <div style={{ ...card, marginBottom:18, padding:0, overflow:'hidden' }}>
+      <div style={{ height:4, background:accent }}/>
+      <div style={{ padding:'18px 22px' }}>
+        <div style={{ color:MUTED, fontSize:12.5 }}>{label}</div>
+        <div style={{ fontSize:30, fontWeight:800, marginTop:4, color:INK, letterSpacing:'-.02em' }}>{value}</div>
+      </div>
+    </div>
+  );
 }
 function SendRequest({ onSend, busy }) {
   const [name,setName]=useState(''); const [contact,setContact]=useState(''); const [channel,setChannel]=useState('sms');
   return (
     <div style={{ display:'flex', gap:10, flexWrap:'wrap', alignItems:'flex-end' }}>
-      <div style={{ flex:1, minWidth:140 }}><label style={{ fontSize:13, fontWeight:600 }}>שם הלקוח</label><input style={inp} value={name} onChange={e=>setName(e.target.value)} /></div>
-      <div style={{ flex:1, minWidth:140 }}><label style={{ fontSize:13, fontWeight:600 }}>טלפון/מייל</label><input style={inp} value={contact} onChange={e=>setContact(e.target.value)} /></div>
+      <div style={{ flex:1, minWidth:140 }}><label style={{ fontSize:13, fontWeight:600, color:INK }}>שם הלקוח</label><input style={inp} value={name} onChange={e=>setName(e.target.value)} /></div>
+      <div style={{ flex:1, minWidth:140 }}><label style={{ fontSize:13, fontWeight:600, color:INK }}>טלפון / מייל</label><input style={inp} value={contact} onChange={e=>setContact(e.target.value)} /></div>
       <select style={{ ...inp, width:120 }} value={channel} onChange={e=>setChannel(e.target.value)}><option value="sms">SMS</option><option value="email">אימייל</option><option value="whatsapp">וואטסאפ</option></select>
       <button style={btn} disabled={busy} onClick={()=>{ if(!name&&!contact){alert('מלא שם או טלפון');return;} onSend({name,contact,channel}); setName('');setContact(''); }}>שלח בקשה</button>
     </div>
@@ -149,29 +164,32 @@ function Settings({ business, onSave, busy }) {
   return (
     <div>
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
-        <div><label style={{ fontSize:13, fontWeight:600 }}>שם העסק</label><input style={inp} value={name} onChange={e=>setName(e.target.value)} /></div>
-        <div><label style={{ fontSize:13, fontWeight:600 }}>עיר</label><input style={inp} value={city} onChange={e=>setCity(e.target.value)} /></div>
-        <div><label style={{ fontSize:13, fontWeight:600 }}>סוג עסק</label><select style={inp} value={type} onChange={e=>setType(e.target.value)}>{Object.entries(TYPES).map(([k,v])=><option key={k} value={k}>{v}</option>)}</select></div>
-        <div><label style={{ fontSize:13, fontWeight:600 }}>קישור ביקורת בגוגל</label><input style={inp} value={google} onChange={e=>setGoogle(e.target.value)} placeholder="https://g.page/r/..." /></div>
+        <div><label style={{ fontSize:13, fontWeight:600, color:INK }}>שם העסק</label><input style={inp} value={name} onChange={e=>setName(e.target.value)} /></div>
+        <div><label style={{ fontSize:13, fontWeight:600, color:INK }}>עיר</label><input style={inp} value={city} onChange={e=>setCity(e.target.value)} /></div>
+        <div><label style={{ fontSize:13, fontWeight:600, color:INK }}>סוג עסק</label><select style={inp} value={type} onChange={e=>setType(e.target.value)}>{Object.entries(TYPES).map(([k,v])=><option key={k} value={k}>{v}</option>)}</select></div>
+        <div><label style={{ fontSize:13, fontWeight:600, color:INK }}>קישור ביקורת בגוגל</label><input style={{ ...inp, direction:'ltr', textAlign:'left' }} value={google} onChange={e=>setGoogle(e.target.value)} placeholder="https://g.page/r/..." /></div>
       </div>
-      <button style={btn} disabled={busy} onClick={()=>onSave({ name, city, business_type:type, google_review_url:google })}>שמור</button>
+      <button style={btn} disabled={busy} onClick={()=>onSave({ name, city, business_type:type, google_review_url:google })}>שמור שינויים</button>
     </div>
   );
 }
 function Onboard({ onCreate, email, logout, busy }) {
   const [name,setName]=useState(''); const [city,setCity]=useState(''); const [type,setType]=useState('salon'); const [google,setGoogle]=useState('');
+  const page = { minHeight:'100vh', direction:'rtl', display:'flex', alignItems:'center', justifyContent:'center', background:'radial-gradient(125% 125% at 50% 0%, #f4fafb 0%, #e7eff4 55%, #dde8ee 100%)', padding:'24px 16px' };
   return (
-    <main style={{ maxWidth:520, margin:'60px auto', padding:'0 20px', direction:'rtl' }}>
-      <div style={{ ...card }}>
-        <h2 style={{ fontSize:20, fontWeight:800 }}>ברוך הבא ל-RepuCare 👋</h2>
-        <p style={{ color:'#586b74', margin:'6px 0 16px' }}>בוא נקים את העסק שלך (דקה).</p>
-        <label style={{ fontSize:13, fontWeight:600 }}>שם העסק</label><input style={inp} value={name} onChange={e=>setName(e.target.value)} />
-        <label style={{ fontSize:13, fontWeight:600 }}>עיר</label><input style={inp} value={city} onChange={e=>setCity(e.target.value)} />
-        <label style={{ fontSize:13, fontWeight:600 }}>סוג עסק</label>
+    <main style={page}>
+      <div style={{ ...card, width:'100%', maxWidth:520, marginBottom:0 }}>
+        <Logo/>
+        <div style={goldRule}/>
+        <h2 style={{ fontSize:20, fontWeight:800, color:INK }}>ברוך הבא ל‑RepuCare 👋</h2>
+        <p style={{ color:MUTED, margin:'6px 0 16px' }}>בוא נקים את העסק שלך (דקה).</p>
+        <label style={{ fontSize:13, fontWeight:600, color:INK }}>שם העסק</label><input style={inp} value={name} onChange={e=>setName(e.target.value)} />
+        <label style={{ fontSize:13, fontWeight:600, color:INK }}>עיר</label><input style={inp} value={city} onChange={e=>setCity(e.target.value)} />
+        <label style={{ fontSize:13, fontWeight:600, color:INK }}>סוג עסק</label>
         <select style={inp} value={type} onChange={e=>setType(e.target.value)}>{Object.entries(TYPES).map(([k,v])=><option key={k} value={k}>{v}</option>)}</select>
-        <label style={{ fontSize:13, fontWeight:600 }}>קישור ביקורת בגוגל (אפשר בהמשך)</label><input style={inp} value={google} onChange={e=>setGoogle(e.target.value)} placeholder="https://g.page/r/..." />
-        <button style={btn} disabled={busy} onClick={()=>{ if(!name){alert('מלא שם עסק');return;} onCreate({ name, city, business_type:type, google_review_url:google }); }}>צור עסק</button>
-        <div style={{ marginTop:12, fontSize:12, color:'#586b74' }}>{email} · <span style={{ cursor:'pointer', color:'#0b6f8e' }} onClick={logout}>יציאה</span></div>
+        <label style={{ fontSize:13, fontWeight:600, color:INK }}>קישור ביקורת בגוגל (אפשר בהמשך)</label><input style={{ ...inp, direction:'ltr', textAlign:'left' }} value={google} onChange={e=>setGoogle(e.target.value)} placeholder="https://g.page/r/..." />
+        <button style={{ ...btn, width:'100%', marginTop:4 }} disabled={busy} onClick={()=>{ if(!name){alert('מלא שם עסק');return;} onCreate({ name, city, business_type:type, google_review_url:google }); }}>צור עסק</button>
+        <div style={{ marginTop:12, fontSize:12, color:MUTED }}>{email} · <span style={{ cursor:'pointer', color:PETROL }} onClick={logout}>יציאה</span></div>
       </div>
     </main>
   );
