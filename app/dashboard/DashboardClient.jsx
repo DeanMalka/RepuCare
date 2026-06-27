@@ -94,7 +94,7 @@ export default function DashboardClient({ email, business, feedback, requests, s
       <div style={card}>
         <h3 style={h3}>שליחת בקשת ביקורת ללקוח</h3>
         <div style={goldRule}/>
-        <SendRequest onSend={async (b)=>{ const r=await post('/api/requests', b); if(r.ok) router.refresh(); else alert(r.error||'שגיאה'); }} busy={busy} />
+        <SendRequest onSend={async (b)=>{ const r=await post('/api/requests', b); if(r.ok) router.refresh(); else alert(r.error||'שגיאה'); return r; }} busy={busy} />
       </div>
 
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:18 }}>
@@ -207,13 +207,24 @@ function Kpi({ label, value, accent }) {
   );
 }
 function SendRequest({ onSend, busy }) {
-  const [name,setName]=useState(''); const [contact,setContact]=useState(''); const [channel,setChannel]=useState('sms');
+  const [name,setName]=useState(''); const [contact,setContact]=useState(''); const [channel,setChannel]=useState('sms'); const [msg,setMsg]=useState(null);
   return (
-    <div style={{ display:'flex', gap:10, flexWrap:'wrap', alignItems:'flex-end' }}>
-      <div style={{ flex:1, minWidth:140 }}><label style={{ fontSize:13, fontWeight:600, color:INK }}>שם הלקוח</label><input style={inp} value={name} onChange={e=>setName(e.target.value)} /></div>
-      <div style={{ flex:1, minWidth:140 }}><label style={{ fontSize:13, fontWeight:600, color:INK }}>טלפון / מייל</label><input style={inp} value={contact} onChange={e=>setContact(e.target.value)} /></div>
-      <select style={{ ...inp, width:120 }} value={channel} onChange={e=>setChannel(e.target.value)}><option value="sms">SMS</option><option value="email">אימייל</option><option value="whatsapp">וואטסאפ</option></select>
-      <button style={btn} disabled={busy} onClick={()=>{ if(!name&&!contact){alert('מלא שם או טלפון');return;} onSend({name,contact,channel}); setName('');setContact(''); }}>שלח בקשה</button>
+    <div>
+      <div style={{ display:'flex', gap:10, flexWrap:'wrap', alignItems:'flex-end' }}>
+        <div style={{ flex:1, minWidth:140 }}><label style={{ fontSize:13, fontWeight:600, color:INK }}>שם הלקוח</label><input style={inp} value={name} onChange={e=>setName(e.target.value)} /></div>
+        <div style={{ flex:1, minWidth:140 }}><label style={{ fontSize:13, fontWeight:600, color:INK }}>טלפון / מייל</label><input style={inp} value={contact} onChange={e=>setContact(e.target.value)} /></div>
+        <select style={{ ...inp, width:120 }} value={channel} onChange={e=>setChannel(e.target.value)}><option value="sms">SMS</option><option value="email">אימייל</option><option value="whatsapp">וואטסאפ</option></select>
+        <button style={btn} disabled={busy} onClick={async()=>{ if(!name&&!contact){alert('מלא שם או טלפון');return;} const r=await onSend({name,contact,channel}); if(r&&r.ok){ setMsg(r.returning ? { t:'returning', v:r.visitCount } : { t:'new' }); setName(''); setContact(''); } }}>שלח בקשה</button>
+      </div>
+      {msg && (
+        <div style={{ marginTop:12, padding:'10px 14px', borderRadius:12, fontSize:13.5, lineHeight:1.6,
+          background: msg.t==='returning' ? '#fff7e8' : '#eafaf4',
+          border:'1px solid '+(msg.t==='returning' ? '#f0e2c0' : '#cdeede'), color:INK }}>
+          {msg.t==='returning'
+            ? <>👋 <b>לקוח חוזר</b> (ביקור מס׳ {msg.v})! לקוח שחוזר = סימן ששירותכם טוב. מומלץ לשלוח לו <b>"תודה שבחרת בנו שוב"</b> — ואם כבר השאיר ביקורת בעבר, אין צורך לבקש שוב.</>
+            : <>✓ נשלחה בקשת ביקורת ללקוח חדש.</>}
+        </div>
+      )}
     </div>
   );
 }
