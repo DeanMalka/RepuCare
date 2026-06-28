@@ -4,32 +4,46 @@ import { useRouter } from 'next/navigation';
 import { browserClient } from '../../lib/supabaseBrowser';
 
 const TYPES = { dental:'מרפאת שיניים', salon:'מספרה / ברבר', dog:'מספרת כלבים', garage:'מוסך', play:'משחקייה', event:'אולם אירועים', aesthetic:'אסתטיקה' };
+const HEB_M = ['ינו׳','פבר׳','מרץ','אפר׳','מאי','יוני','יולי','אוג׳','ספט׳','אוק׳','נוב׳','דצמ׳'];
 
-const INK = '#0a1c26', PETROL = '#0b6f8e', TEAL = '#0fa7a3', GOLD = '#c4a35a', MUTED = '#5a6b73';
-const card = { background:'#fff', border:'1px solid #eef3f6', borderRadius:20, padding:24, boxShadow:'0 18px 44px -26px rgba(10,40,52,.28)', marginBottom:18 };
+// palette (from the approved mockup)
+const INK='#0a1c26', INK2='#0e2733', PETROL='#0b6f8e', TEAL='#0fa7a3', TEALL='#5fd6d2', GOLD='#c4a35a', STAR='#f5b50a', POS='#10936f', MUTED='#5f717b', LINE='#e4edf2';
+
+const panel = { background:'#fff', border:'1px solid '+LINE, borderRadius:18, padding:20, boxShadow:'0 14px 36px -18px rgba(10,40,52,.28)' };
+const h3 = { fontSize:16, fontWeight:700, color:INK };
 const inp = { width:'100%', padding:12, border:'1.5px solid #e2ecf1', borderRadius:12, fontSize:15, fontFamily:'inherit', marginBottom:10, outline:'none', background:'#fbfdfe', color:INK };
-const btn = { padding:'11px 18px', border:'none', borderRadius:12, background:'linear-gradient(135deg,#0fa7a3,#0b6f8e)', color:'#fff', fontWeight:700, fontSize:14.5, cursor:'pointer', fontFamily:'inherit', boxShadow:'0 12px 24px -12px rgba(11,111,142,.55)' };
-const ghost = { padding:'10px 16px', border:'1px solid #dfeaef', borderRadius:12, background:'#fff', color:PETROL, fontWeight:600, fontSize:14, cursor:'pointer', fontFamily:'inherit' };
-const goldRule = { height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'10px 0 16px' };
-const h3 = { fontSize:16, fontWeight:800, color:INK, letterSpacing:'-.01em' };
+const btn = { display:'inline-flex', alignItems:'center', gap:8, padding:'11px 18px', border:'none', borderRadius:11, background:'linear-gradient(135deg,'+TEAL+','+PETROL+')', color:'#fff', fontWeight:600, fontSize:14.5, cursor:'pointer', fontFamily:'inherit', boxShadow:'0 12px 26px -12px rgba(11,111,142,.6)', textDecoration:'none' };
+const ghost = { padding:'10px 16px', border:'1px solid #dfeaef', borderRadius:11, background:'#fff', color:PETROL, fontWeight:600, fontSize:14, cursor:'pointer', fontFamily:'inherit', textDecoration:'none' };
+const soon = { fontSize:10.5, color:MUTED, border:'1px solid '+LINE, borderRadius:999, padding:'1px 8px' };
 
-function Logo() {
+function RcMark({ s=30 }) {
   return (
-    <div style={{ display:'flex', alignItems:'center', gap:9 }}>
-      <svg width="38" height="38" viewBox="0 0 120 120" aria-hidden="true" style={{ display:'block', filter:'drop-shadow(0 6px 14px rgba(11,111,142,.3))' }}>
-        <defs><linearGradient id="rcg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#62d7d2"/><stop offset="1" stopColor="#0b6f8e"/></linearGradient></defs>
-        <rect x="8" y="8" width="104" height="104" rx="28" fill="url(#rcg)"/>
-        <circle cx="57" cy="55" r="29" fill="#fff"/>
-        <path d="M40 74 L34 93 L58 79 Z" fill="#fff"/>
-        <path d="M57 69c-9-6-17-11-17-19 0-5 4-8 8-8 4 0 7 2 9 6 2-4 5-6 9-6 4 0 8 3 8 8 0 8-8 13-17 19z" fill="#0b6f8e"/>
-        <path d="M95 20 l3 9 9 3 -9 3 -3 9 -3-9 -9-3 9-3 z" fill="#fff"/>
-      </svg>
-      <span style={{ fontWeight:800, fontSize:23, letterSpacing:'-.03em' }}><span style={{ color:PETROL }}>Repu</span><span style={{ color:TEAL }}>Care</span></span>
-    </div>
+    <svg width={s} height={s} viewBox="0 0 120 120" aria-hidden="true" style={{ filter:'drop-shadow(0 0 8px rgba(95,214,210,.45))' }}>
+      <defs><linearGradient id="rcg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#62d7d2"/><stop offset="1" stopColor="#0b6f8e"/></linearGradient></defs>
+      <rect x="8" y="8" width="104" height="104" rx="28" fill="url(#rcg)"/>
+      <circle cx="57" cy="55" r="29" fill="#fff"/>
+      <path d="M40 74 L34 93 L58 79 Z" fill="#fff"/>
+      <path d="M57 69c-9-6-17-11-17-19 0-5 4-8 8-8 4 0 7 2 9 6 2-4 5-6 9-6 4 0 8 3 8 8 0 8-8 13-17 19z" fill="#0b6f8e"/>
+      <path d="M95 20 l3 9 9 3 -9 3 -3 9 -3-9 -9-3 9-3 z" fill="#fff"/>
+    </svg>
   );
 }
+const I = {
+  grid:'M3 3h8v8H3zM13 3h8v5h-8zM13 11h8v10h-8zM3 13h8v8H3z',
+  send:'M4 4h16v12H7l-3 3z',
+  star:'m12 3 2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z',
+  chat:'M21 11.5a8 8 0 0 1-11 7L4 20l1.5-5A8 8 0 1 1 21 11.5z',
+  bars:'M4 19V5m0 14h16M8 16v-5m4 5V8m4 8v-3',
+  gear:'M19 12a7 7 0 0 0-.1-1l2-1.6-2-3.4-2.3 1a7 7 0 0 0-1.7-1L14.5 2h-5l-.4 2.4a7 7 0 0 0-1.7 1l-2.3-1-2 3.4 2 1.6a7 7 0 0 0 0 2l-2 1.6 2 3.4 2.3-1a7 7 0 0 0 1.7 1L9.5 22h5l.4-2.4a7 7 0 0 0 1.7-1l2.3 1 2-3.4-2-1.6a7 7 0 0 0 .1-1z',
+  trend:'M3 17l6-6 4 4 7-7M14 5h5v5',
+  shield:'M12 3l7 3v6c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6z',
+};
+function Ico({ d, s=19, stroke='currentColor' }) {
+  return <svg viewBox="0 0 24 24" width={s} height={s} style={{ stroke, fill:'none', strokeWidth:1.8, flex:'none' }}><path d={d} strokeLinejoin="round"/></svg>;
+}
+function stars(v){ const n=Math.round(v||0); return '★★★★★'.slice(0,n)+'☆☆☆☆☆'.slice(0,5-n); }
 
-export default function DashboardClient({ email, business, feedback, requests, sub, appUrl, leads = [] }) {
+export default function DashboardClient({ email, isAdmin=false, business, feedback=[], requests=[], reviews=[], events=[], sub, appUrl, leads = [] }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   async function post(url, body, method='POST') {
@@ -44,14 +58,37 @@ export default function DashboardClient({ email, business, feedback, requests, s
     return <Onboard onCreate={async (b)=>{ const r=await post('/api/business', b); if(r.ok) router.refresh(); else alert(r.error||'שגיאה'); }} email={email} logout={logout} busy={busy} />;
   }
 
+  // ---- derived REAL metrics ----
+  const ratingEvents = events.filter(e=>e.type==='rating').map(e=> Number(e.meta && e.meta.rating)).filter(n=>n>=1&&n<=5);
+  const fbRatings = feedback.map(f=>f.rating).filter(n=>typeof n==='number' && n>=1 && n<=5);
+  const allRatings = [...ratingEvents, ...fbRatings];
+  const avgRating = allRatings.length ? (allRatings.reduce((a,b)=>a+b,0)/allRatings.length) : null;
+  const googleCount = reviews.length;
+  const requestsSent = requests.length;
+  const conversion = requestsSent ? Math.round((ratingEvents.length / requestsSent) * 100) : null;
+  const caughtPrivate = feedback.length;
   const openFb = feedback.filter(f=>f.status==='new').length;
   const ratingLink = (appUrl||'') + '/r/' + business.rating_token;
-  const planLabel = sub ? (sub.status==='trialing' ? 'בתקופת ניסיון (45 יום)' : sub.status) : 'ללא מנוי פעיל';
-  const page = { minHeight:'100vh', direction:'rtl', background:'radial-gradient(120% 90% at 50% 0%, #f4fafb 0%, #e9f1f5 45%, #e1ebf0 100%)', padding:'26px 18px 70px' };
+  const planLabel = sub ? (sub.status==='trialing' ? 'בתקופת ניסיון (45 יום)' : sub.status==='active' ? 'מנוי פעיל' : sub.status) : 'ללא מנוי פעיל';
+
+  // ---- 6-month series from real timestamps ----
+  const base = new Date(); base.setDate(1);
+  const months = [];
+  for (let i=5;i>=0;i--){
+    const m = new Date(base.getFullYear(), base.getMonth()-i, 1);
+    const y=m.getFullYear(), mo=m.getMonth();
+    const inM = (ts)=>{ const t=new Date(ts); return t.getFullYear()===y && t.getMonth()===mo; };
+    const reqN = requests.filter(r=>inM(r.created_at)).length;
+    const rs = events.filter(e=>e.type==='rating' && inM(e.created_at)).map(e=>Number(e.meta&&e.meta.rating)).filter(n=>n>=1&&n<=5);
+    months.push({ label:HEB_M[mo], reqN, ratingAvg: rs.length ? rs.reduce((a,b)=>a+b,0)/rs.length : null });
+  }
+  const maxReq = Math.max(1, ...months.map(m=>m.reqN));
+  const hasSeries = months.some(m=>m.reqN>0 || m.ratingAvg!=null);
 
   const SURVEY_Q = [['q_service','שירות'],['q_staff','יחס הצוות'],['q_value','מחיר מול תמורה'],['q_timeliness','מהירות / זמנים']];
   const surveyAvg = (k) => { const v = feedback.map(f=>f[k]).filter(n=>typeof n==='number'); return v.length ? (v.reduce((a,b)=>a+b,0)/v.length) : null; };
   const surveyCount = feedback.filter(f => SURVEY_Q.some(([k])=>typeof f[k]==='number')).length;
+
   function exportLeadsCsv() {
     const head = ['תאריך','שם עסק','איש קשר','טלפון','דירוג','מס׳ ביקורות','סטטוס'];
     const rows = leads.map(l => [new Date(l.created_at).toLocaleString('he-IL'), l.business_name||'', l.contact_name||'', l.contact_phone||'', l.google_rating==null?'':l.google_rating, l.google_reviews_count==null?'':l.google_reviews_count, l.status||'']);
@@ -60,152 +97,312 @@ export default function DashboardClient({ email, business, feedback, requests, s
     const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'repucare-leads.csv'; a.click(); URL.revokeObjectURL(url);
   }
 
+  const shell = { display:'grid', gridTemplateColumns:'262px 1fr', minHeight:'100vh', direction:'rtl', background:'#eef4f8', color:'#15242c', fontFamily:'Rubik, system-ui, Arial, sans-serif' };
+  const side = { background:'linear-gradient(180deg,'+INK+','+INK2+')', color:'#fff', padding:'22px 16px', position:'sticky', top:0, height:'100vh', display:'flex', flexDirection:'column' };
+  const main = { padding:'22px 28px 60px', minWidth:0 };
+  const navA = (on)=>({ display:'flex', alignItems:'center', gap:11, color: on?'#fff':'rgba(255,255,255,.72)', padding:'11px 13px', borderRadius:12, fontSize:15, fontWeight:500, textDecoration:'none', background: on?'linear-gradient(135deg,rgba(15,167,163,.22),rgba(11,111,142,.22))':'transparent', boxShadow: on?'inset 0 0 0 1px rgba(95,214,210,.3)':'none' });
+
   return (
-    <main style={page}>
-    <div style={{ maxWidth:1000, margin:'0 auto' }}>
-      <header style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:22, flexWrap:'wrap', gap:12 }}>
-        <div>
-          <Logo/>
-          <div style={{ color:MUTED, fontSize:13.5, marginTop:6 }}>{business.name} · {business.city} · {TYPES[business.business_type]||business.business_type}</div>
+    <div style={shell} className="rc-shell">
+      {/* ---------- sidebar ---------- */}
+      <aside style={side} className="rc-side">
+        <div style={{ display:'flex', alignItems:'center', gap:9, padding:'6px 10px 22px', direction:'ltr' }}>
+          <span style={{ fontWeight:800, fontSize:20, letterSpacing:'-.03em', color:'#fff' }}>RepuCare</span>
+          <RcMark s={28}/>
         </div>
-        <div style={{ display:'flex', gap:10, alignItems:'center' }}>
-          <span style={{ fontSize:12.5, color:PETROL, background:'#fff', border:'1px solid #dcebf0', borderRadius:999, padding:'6px 14px', fontWeight:600 }}>{planLabel}</span>
-          <button style={ghost} onClick={logout}>יציאה</button>
+        <nav style={{ display:'flex', flexDirection:'column', gap:4 }}>
+          <a style={navA(true)} href="#top"><Ico d={I.grid}/> דשבורד</a>
+          <a style={navA(false)} href="#send"><Ico d={I.send}/> בקשות ביקורת</a>
+          <a style={navA(false)} href="#reviews"><Ico d={I.star}/> ביקורות</a>
+          <a style={navA(false)} href="#feedback"><Ico d={I.chat}/> פידבק פרטי {openFb>0 && <span style={{ marginInlineStart:'auto', background:'#e0913a', color:'#fff', fontSize:11, borderRadius:999, padding:'1px 7px' }}>{openFb}</span>}</a>
+          <a style={navA(false)} href="#reports"><Ico d={I.bars}/> דוחות</a>
+          <a style={navA(false)} href="#settings"><Ico d={I.gear}/> הגדרות</a>
+          {isAdmin && <a style={navA(false)} href="#leads"><Ico d={I.trend}/> לידים <span style={{ marginInlineStart:'auto', background:TEAL, color:'#fff', fontSize:11, borderRadius:999, padding:'1px 7px' }}>{leads.length}</span></a>}
+        </nav>
+        <div style={{ marginTop:'auto', background:'rgba(255,255,255,.05)', border:'1px solid rgba(255,255,255,.1)', borderRadius:14, padding:'12px 14px', fontSize:13 }}>
+          <b style={{ display:'block', color:'#fff', fontSize:14 }}>{business.name}</b>
+          <span style={{ color:'rgba(255,255,255,.55)' }}>{business.city || '—'} · {TYPES[business.business_type]||business.business_type}</span>
+          {sub && (sub.status==='trialing'||sub.status==='active')
+            ? <span style={{ display:'inline-block', marginTop:8, fontSize:10.5, letterSpacing:'.06em', color:'#9ff0e6', border:'1px solid rgba(95,214,210,.4)', borderRadius:999, padding:'2px 9px' }}>{sub.status==='trialing'?'פיילוט · 45 יום חינם':'מנוי פעיל'}</span>
+            : <span style={{ display:'inline-block', marginTop:8, fontSize:10.5, letterSpacing:'.06em', color:GOLD, border:'1px solid rgba(196,163,90,.45)', borderRadius:999, padding:'2px 9px' }}>ללא מנוי פעיל</span>}
         </div>
-      </header>
+      </aside>
 
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:14, marginBottom:4 }}>
-        <Kpi label="בקשות שנשלחו" value={requests.length} accent={TEAL} />
-        <Kpi label="פידבק פתוח לטיפול" value={openFb} accent={GOLD} />
-        <Kpi label="סטטוס מנוי" value={sub ? (sub.status==='trialing'?'ניסיון':'פעיל') : '—'} accent={PETROL} />
-      </div>
-
-      <div style={card}>
-        <h3 style={h3}>קישור הדירוג שלך</h3>
-        <div style={goldRule}/>
-        <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
-          <input style={{ ...inp, marginBottom:0, flex:1, minWidth:240, direction:'ltr', textAlign:'left' }} readOnly value={ratingLink} />
-          <button style={ghost} onClick={()=>{navigator.clipboard&&navigator.clipboard.writeText(ratingLink); alert('הקישור הועתק');}}>העתק</button>
-          <a style={{ ...btn, textDecoration:'none', display:'inline-flex', alignItems:'center' }} href={'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(ratingLink)} target="_blank" rel="noreferrer">קוד QR</a>
+      {/* ---------- main ---------- */}
+      <main style={main} id="top">
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:16, marginBottom:22, flexWrap:'wrap' }}>
+          <div>
+            <h1 style={{ fontSize:23, fontWeight:800, letterSpacing:'-.02em' }}>שלום {business.name} 👋</h1>
+            <div style={{ color:MUTED, fontSize:13.5, marginTop:2 }}>תמונת המוניטין של העסק — {new Date().toLocaleDateString('he-IL',{month:'long',year:'numeric'})}</div>
+          </div>
+          <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+            <span style={{ fontSize:12.5, color:PETROL, background:'#fff', border:'1px solid #dcebf0', borderRadius:999, padding:'6px 14px', fontWeight:600 }}>{planLabel}</span>
+            <a style={btn} href="#send"><Ico d={I.send} s={16} stroke="#fff"/> שלח בקשת ביקורת</a>
+            <button style={{ ...ghost }} onClick={logout}>יציאה</button>
+          </div>
         </div>
-        <p style={{ fontSize:12.5, color:MUTED, marginTop:10 }}>תלו את ה‑QR בעסק או שלחו את הקישור ללקוחות אחרי השירות. דירוג גבוה → גוגל, נמוך → פידבק פרטי אליכם.</p>
-      </div>
 
-      <div style={card}>
-        <h3 style={h3}>שליחת בקשת ביקורת ללקוח</h3>
-        <div style={goldRule}/>
-        <SendRequest onSend={async (b)=>{ const r=await post('/api/requests', b); if(r.ok) router.refresh(); else alert(r.error||'שגיאה'); return r; }} busy={busy} />
-      </div>
+        {/* KPIs */}
+        <div className="rc-kpis" style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:14, marginBottom:18 }}>
+          <Kpi icon={I.star} label="דירוג ממוצע" value={avgRating!=null? avgRating.toFixed(1) : '—'}
+               extra={avgRating!=null ? <span style={{ color:STAR, fontSize:13, letterSpacing:1 }}>{stars(avgRating)}</span> : null}
+               delta={avgRating!=null ? allRatings.length+' דירוגים שנאספו' : 'אין דירוגים עדיין'} />
+          <Kpi icon={I.star} label="ביקורות גוגל" value={googleCount}
+               delta={googleCount>0 ? 'מסונכרן' : 'בקרוב · סנכרון גוגל'} flat={googleCount===0} />
+          <Kpi icon={I.send} label="בקשות שנשלחו" value={requestsSent} delta="סה״כ" flat />
+          <Kpi icon={I.trend} label="המרה לביקורת" value={conversion!=null? conversion : '—'} small={conversion!=null?'%':''}
+               delta={conversion!=null ? 'מתוך הבקשות' : 'יוצג אחרי בקשות'} flat />
+          <Kpi icon={I.shield} label="נחסם מפומבי" value={caughtPrivate} delta="פידבק פרטי" flat />
+        </div>
 
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:18 }}>
-        <div style={card}>
-          <h3 style={h3}>פידבק פרטי {openFb>0 && <span style={{ fontSize:12, color:'#fff', background:GOLD, borderRadius:999, padding:'2px 9px', marginInlineStart:6 }}>{openFb} חדש</span>}</h3>
-          <div style={goldRule}/>
-          {feedback.length===0 && <p style={{ color:MUTED, fontSize:14 }}>אין פידבק עדיין.</p>}
-          {feedback.map(f=>(
-            <div key={f.id} style={{ padding:'11px 0', borderBottom:'1px solid #f0f5f7' }}>
-              <div style={{ fontSize:14, color:INK, lineHeight:1.5 }}>{f.body || '(ללא טקסט)'} {f.rating?<span style={{ color:GOLD, fontWeight:700 }}>· {f.rating}★</span>:''}</div>
-              <div style={{ fontSize:11.5, color:MUTED, marginTop:5 }}>
+        {/* chart + sources */}
+        <div className="rc-2col" style={{ display:'grid', gridTemplateColumns:'1.5fr 1fr', gap:18, marginBottom:18 }}>
+          <div style={panel}>
+            <div style={{ marginBottom:8 }}><h3 style={h3}>פעילות ודירוג</h3><div style={{ color:MUTED, fontSize:12.5 }}>6 חודשים אחרונים</div></div>
+            {hasSeries ? <GrowthChart months={months} maxReq={maxReq}/> :
+              <div style={{ padding:'34px 8px', textAlign:'center', color:MUTED, fontSize:13.5 }}>
+                צובר נתונים — ככל שתשלח בקשות ותאסוף דירוגים, כאן תופיע מגמת הצמיחה החודשית.
+              </div>}
+            <div style={{ display:'flex', gap:16, fontSize:12.5, color:MUTED, marginTop:6 }}>
+              <span><i style={{ display:'inline-block', width:11, height:11, borderRadius:3, marginInlineEnd:6, background:TEAL, verticalAlign:'-1px' }}/>בקשות בחודש</span>
+              <span><i style={{ display:'inline-block', width:11, height:11, borderRadius:3, marginInlineEnd:6, background:GOLD, verticalAlign:'-1px' }}/>דירוג ממוצע</span>
+            </div>
+          </div>
+
+          <div style={panel}>
+            <div style={{ marginBottom:14 }}><h3 style={h3}>מקור הביקורות</h3><div style={{ color:MUTED, fontSize:12.5 }}>לפי ערוץ</div></div>
+            <Src name="Google" val={googleCount} max={Math.max(1,googleCount)} color="#fff" border>
+              <svg width="17" height="17" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.7 1.2 9.2 3.6l6.8-6.8C35.9 2.4 30.5 0 24 0 14.6 0 6.5 5.4 2.6 13.2l8 6.2C12.4 13.7 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M47 24.5c0-1.6-.2-3.1-.4-4.5H24v9h12.9c-.6 3-2.3 5.5-4.8 7.2l7.7 6c4.5-4.2 7.2-10.4 7.2-17.7z"/><path fill="#FBBC05" d="M10.5 28.6c-.5-1.5-.8-3-.8-4.6s.3-3.1.8-4.6l-8-6.2C.9 16.5 0 20.1 0 24s.9 7.5 2.6 10.8z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.7-6c-2.1 1.5-4.9 2.3-8.2 2.3-6.3 0-11.6-4.2-13.5-9.9l-8 6.2C6.5 42.6 14.6 48 24 48z"/></svg>
+            </Src>
+            <Src name="Facebook" soonLabel="בקרוב · שלב 2" color="#1877f2"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06C2 17 5.66 21.13 10.44 21.94v-7H7.9v-2.94h2.54V9.85c0-2.52 1.5-3.91 3.78-3.91 1.1 0 2.24.2 2.24.2v2.46H15.2c-1.24 0-1.63.78-1.63 1.57v1.89h2.78l-.44 2.94h-2.34v7C18.34 21.13 22 17 22 12.06"/></svg></Src>
+            <Src name="Instagram" soonLabel="בקרוב · שלב 2" color="linear-gradient(135deg,#f09433,#bc1888)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="#fff" stroke="none"/></svg></Src>
+            <p style={{ fontSize:12, color:MUTED, marginTop:14 }}>בשלב 2 נאחד גם פייסבוק ואינסטגרם — וכל תגובה, בכל ערוץ, תיספר כאן.</p>
+          </div>
+        </div>
+
+        {/* reviews + private feedback */}
+        <div className="rc-2col" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:18, marginBottom:18 }}>
+          <div style={panel} id="reviews">
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}><h3 style={h3}>ביקורות גוגל אחרונות</h3></div>
+            {reviews.length===0
+              ? <div style={{ padding:'22px 6px', color:MUTED, fontSize:13.5, lineHeight:1.6 }}>
+                  סנכרון ביקורות הגוגל שלך מגיע ב<b style={{color:INK}}>שלב 2</b>. בינתיים — כל דירוג שנאסף דרך RepuCare מופיע במדדים למעלה, והדירוגים הנמוכים נתפסים בפידבק הפרטי משמאל.
+                </div>
+              : reviews.map(rv=>(
+                  <div key={rv.id} style={{ display:'flex', gap:12, padding:'13px 0', borderBottom:'1px solid '+LINE }}>
+                    <div style={{ width:40, height:40, borderRadius:'50%', background:'#dbe8ee', color:PETROL, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, flex:'none' }}>{(rv.reviewer||'?').slice(0,1)}</div>
+                    <div>
+                      <div style={{ display:'flex', alignItems:'center', gap:8 }}><span style={{ fontWeight:600, fontSize:14.5 }}>{rv.reviewer||'לקוח'}</span><span style={{ color:STAR, fontSize:13 }}>{stars(rv.rating)}</span></div>
+                      <div style={{ color:'#43525b', fontSize:13.5, marginTop:2 }}>{rv.body||''}</div>
+                      <div style={{ color:MUTED, fontSize:11.5, marginTop:4 }}>{rv.source||'google'} · {rv.external_date||new Date(rv.created_at).toLocaleDateString('he-IL')}</div>
+                    </div>
+                  </div>
+                ))}
+          </div>
+
+          <div style={panel} id="feedback">
+            <div style={{ marginBottom:8 }}><h3 style={h3}>פידבק פרטי — לטיפול {openFb>0 && <span style={{ fontSize:12, color:'#fff', background:GOLD, borderRadius:999, padding:'2px 9px', marginInlineStart:6 }}>{openFb} חדש</span>}</h3><div style={{ color:MUTED, fontSize:12.5 }}>נתפס לפני שהפך לפומבי</div></div>
+            {feedback.length===0 && <p style={{ color:MUTED, fontSize:14, paddingTop:8 }}>אין פידבק עדיין.</p>}
+            {feedback.map(f=>(
+              <div key={f.id} style={{ display:'flex', gap:11, alignItems:'flex-start', padding:'12px 0', borderBottom:'1px solid '+LINE }}>
+                <span style={{ width:9, height:9, borderRadius:'50%', marginTop:6, flex:'none', background: f.status==='new'?'#e0913a':POS }}/>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontSize:13.5, color:'#3a4750', lineHeight:1.5 }}>{f.body || '(ללא טקסט)'} {f.rating?<span style={{ color:GOLD, fontWeight:700 }}>· {f.rating}★</span>:''}</div>
+                  <div style={{ color:MUTED, fontSize:11.5, marginTop:3 }}>אנונימי · {new Date(f.created_at).toLocaleDateString('he-IL')}</div>
+                </div>
                 {f.status==='new'
                   ? <button style={{ ...ghost, padding:'4px 11px', fontSize:12 }} onClick={async()=>{ await post('/api/business',{markFeedback:f.id},'PATCH'); router.refresh(); }}>סמן כטופל</button>
-                  : <span style={{ color:TEAL, fontWeight:600 }}>✓ טופל</span>}
+                  : <span style={{ fontSize:10.5, fontWeight:600, borderRadius:999, padding:'2px 9px', background:'rgba(16,147,111,.14)', color:POS }}>טופל</span>}
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-        <div style={card}>
+
+        {/* share link */}
+        <div style={{ ...panel, marginBottom:18 }} id="share">
+          <h3 style={h3}>קישור הדירוג שלך</h3>
+          <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'10px 0 16px' }}/>
+          <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+            <input style={{ ...inp, marginBottom:0, flex:1, minWidth:240, direction:'ltr', textAlign:'left' }} readOnly value={ratingLink} />
+            <button style={ghost} onClick={()=>{navigator.clipboard&&navigator.clipboard.writeText(ratingLink); alert('הקישור הועתק');}}>העתק</button>
+            <a style={btn} href={'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(ratingLink)} target="_blank" rel="noreferrer">קוד QR</a>
+          </div>
+          <p style={{ fontSize:12.5, color:MUTED, marginTop:10 }}>תלו את ה‑QR בעסק או שלחו את הקישור ללקוחות אחרי השירות. דירוג גבוה → גוגל, נמוך → פידבק פרטי אליכם.</p>
+        </div>
+
+        {/* send request */}
+        <div style={{ ...panel, marginBottom:18 }} id="send">
+          <h3 style={h3}>שליחת בקשת ביקורת ללקוח</h3>
+          <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'10px 0 16px' }}/>
+          <SendRequest onSend={async (b)=>{ const r=await post('/api/requests', b); if(r.ok) router.refresh(); else alert(r.error||'שגיאה'); return r; }} busy={busy} />
+        </div>
+
+        {/* survey insights */}
+        <div style={{ ...panel, marginBottom:18 }} id="reports">
+          <h3 style={h3}>תובנות מהסקר {surveyCount>0 && <span style={{ fontSize:12, color:MUTED, fontWeight:500 }}>· {surveyCount} תשובות</span>}</h3>
+          <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'10px 0 16px' }}/>
+          {surveyCount===0
+            ? <p style={{ color:MUTED, fontSize:14 }}>עדיין אין תשובות סקר. ברגע שלקוחות ידרגו, כאן יופיעו הציונים הממוצעים לכל שאלה — ותדע מה הם אוהבים ומה פחות.</p>
+            : <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(170px,1fr))', gap:12 }}>
+                {SURVEY_Q.map(([k,label])=>{ const a=surveyAvg(k); return (
+                  <div key={k} style={{ background:'#f7fbfc', border:'1px solid #e7f0f3', borderRadius:14, padding:'12px 14px' }}>
+                    <div style={{ fontSize:13, color:MUTED }}>{label}</div>
+                    <div style={{ fontSize:22, fontWeight:800, color: a!=null && a<3.5 ? '#c0552d' : INK, marginTop:3 }}>{a!=null? a.toFixed(1) : '—'}<span style={{ fontSize:13, color:MUTED, fontWeight:500 }}> /5</span></div>
+                    <div style={{ height:6, background:'#e7f0f3', borderRadius:99, marginTop:7, overflow:'hidden' }}><div style={{ height:'100%', width:((a||0)/5*100)+'%', background:'linear-gradient(90deg,'+TEAL+','+PETROL+')' }}/></div>
+                  </div> ); })}
+              </div>}
+        </div>
+
+        {/* recent requests */}
+        <div style={{ ...panel, marginBottom:18 }} id="requests">
           <h3 style={h3}>בקשות אחרונות</h3>
-          <div style={goldRule}/>
+          <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'10px 0 16px' }}/>
           {requests.length===0 && <p style={{ color:MUTED, fontSize:14 }}>עדיין לא נשלחו בקשות.</p>}
           {requests.map(r=>(
-            <div key={r.id} style={{ display:'flex', justifyContent:'space-between', padding:'10px 0', borderBottom:'1px solid #f0f5f7', fontSize:14 }}>
+            <div key={r.id} style={{ display:'flex', justifyContent:'space-between', padding:'10px 0', borderBottom:'1px solid '+LINE, fontSize:14 }}>
               <span style={{ color:INK }}>{r.customer_name || r.contact || 'לקוח'}</span>
               <span style={{ color:MUTED, fontSize:12 }}>{r.status} · {r.channel}</span>
             </div>
           ))}
         </div>
-      </div>
 
-      <div style={card}>
-        <h3 style={h3}>תובנות מהסקר {surveyCount>0 && <span style={{ fontSize:12, color:MUTED, fontWeight:500 }}>· {surveyCount} תשובות</span>}</h3>
-        <div style={goldRule}/>
-        {surveyCount===0
-          ? <p style={{ color:MUTED, fontSize:14 }}>עדיין אין תשובות סקר. ברגע שלקוחות ידרגו, כאן יופיעו הציונים הממוצעים לכל שאלה — ותדע מה הם אוהבים ומה פחות.</p>
-          : <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(170px,1fr))', gap:12 }}>
-              {SURVEY_Q.map(([k,label])=>{ const a=surveyAvg(k); return (
-                <div key={k} style={{ background:'#f7fbfc', border:'1px solid #e7f0f3', borderRadius:14, padding:'12px 14px' }}>
-                  <div style={{ fontSize:13, color:MUTED }}>{label}</div>
-                  <div style={{ fontSize:22, fontWeight:800, color: a!=null && a<3.5 ? '#c0552d' : INK, marginTop:3 }}>{a!=null? a.toFixed(1) : '—'}<span style={{ fontSize:13, color:MUTED, fontWeight:500 }}> /5</span></div>
-                  <div style={{ height:6, background:'#e7f0f3', borderRadius:99, marginTop:7, overflow:'hidden' }}><div style={{ height:'100%', width:((a||0)/5*100)+'%', background:'linear-gradient(90deg,#0fa7a3,#0b6f8e)' }}/></div>
-                </div> ); })}
-            </div>}
-      </div>
+        {/* leads — ADMIN ONLY */}
+        {isAdmin && (
+          <div style={{ ...panel, marginBottom:18 }} id="leads">
+            <h3 style={h3}>לידים נכנסים <span style={{ fontSize:11, color:'#fff', background:PETROL, borderRadius:999, padding:'2px 9px', marginInlineStart:6 }}>אדמין</span> {leads.length>0 && <span style={{ fontSize:12, color:'#fff', background:TEAL, borderRadius:999, padding:'2px 9px', marginInlineStart:6 }}>{leads.length}</span>}</h3>
+            <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'10px 0 16px' }}/>
+            {leads.length===0
+              ? <p style={{ color:MUTED, fontSize:14 }}>אין עדיין לידים. כל מי שממלא "בדיקת מוניטין חינם" בעמוד הנחיתה יופיע כאן אוטומטית.</p>
+              : <>
+                <div style={{ overflowX:'auto' }}>
+                  <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13.5 }}>
+                    <thead><tr style={{ color:MUTED }}>
+                      <th style={{ padding:'6px 8px', fontWeight:600, textAlign:'right' }}>עסק</th>
+                      <th style={{ padding:'6px 8px', fontWeight:600, textAlign:'right' }}>איש קשר</th>
+                      <th style={{ padding:'6px 8px', fontWeight:600, textAlign:'right' }}>טלפון</th>
+                      <th style={{ padding:'6px 8px', fontWeight:600, textAlign:'right' }}>גוגל</th>
+                      <th style={{ padding:'6px 8px', fontWeight:600, textAlign:'right' }}>תאריך</th>
+                    </tr></thead>
+                    <tbody>
+                      {leads.map(l=>(
+                        <tr key={l.id} style={{ borderTop:'1px solid '+LINE }}>
+                          <td style={{ padding:'8px', color:INK, fontWeight:600 }}>{l.business_name}</td>
+                          <td style={{ padding:'8px', color:INK }}>{l.contact_name||'—'}</td>
+                          <td style={{ padding:'8px', color:PETROL, direction:'ltr', textAlign:'right' }}>{l.contact_phone||'—'}</td>
+                          <td style={{ padding:'8px', color:MUTED }}>{l.google_rating!=null? '★'+l.google_rating+' · '+(l.google_reviews_count==null?0:l.google_reviews_count) : '—'}</td>
+                          <td style={{ padding:'8px', color:MUTED, fontSize:12 }}>{new Date(l.created_at).toLocaleDateString('he-IL')}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <button style={{ ...ghost, marginTop:12 }} onClick={exportLeadsCsv}>⬇ ייצוא CSV</button>
+              </>}
+          </div>
+        )}
 
-      <div style={card}>
-        <h3 style={h3}>לידים נכנסים {leads.length>0 && <span style={{ fontSize:12, color:'#fff', background:TEAL, borderRadius:999, padding:'2px 9px', marginInlineStart:6 }}>{leads.length}</span>}</h3>
-        <div style={goldRule}/>
-        {leads.length===0
-          ? <p style={{ color:MUTED, fontSize:14 }}>אין עדיין לידים. כל מי שממלא "בדיקת מוניטין חינם" בעמוד הנחיתה יופיע כאן אוטומטית.</p>
-          : <>
-            <div style={{ overflowX:'auto' }}>
-              <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13.5 }}>
-                <thead><tr style={{ color:MUTED }}>
-                  <th style={{ padding:'6px 8px', fontWeight:600, textAlign:'right' }}>עסק</th>
-                  <th style={{ padding:'6px 8px', fontWeight:600, textAlign:'right' }}>איש קשר</th>
-                  <th style={{ padding:'6px 8px', fontWeight:600, textAlign:'right' }}>טלפון</th>
-                  <th style={{ padding:'6px 8px', fontWeight:600, textAlign:'right' }}>גוגל</th>
-                  <th style={{ padding:'6px 8px', fontWeight:600, textAlign:'right' }}>תאריך</th>
-                </tr></thead>
-                <tbody>
-                  {leads.map(l=>(
-                    <tr key={l.id} style={{ borderTop:'1px solid #f0f5f7' }}>
-                      <td style={{ padding:'8px', color:INK, fontWeight:600 }}>{l.business_name}</td>
-                      <td style={{ padding:'8px', color:INK }}>{l.contact_name||'—'}</td>
-                      <td style={{ padding:'8px', color:PETROL, direction:'ltr', textAlign:'right' }}>{l.contact_phone||'—'}</td>
-                      <td style={{ padding:'8px', color:MUTED }}>{l.google_rating!=null? '★'+l.google_rating+' · '+(l.google_reviews_count==null?0:l.google_reviews_count) : '—'}</td>
-                      <td style={{ padding:'8px', color:MUTED, fontSize:12 }}>{new Date(l.created_at).toLocaleDateString('he-IL')}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        {/* patient preview (uses the real rating link) */}
+        <div style={{ ...panel, marginBottom:18 }}>
+          <h3 style={{ ...h3, color:MUTED, fontWeight:700 }}>כך הלקוח רואה את זה</h3>
+          <div style={{ display:'grid', gridTemplateColumns:'320px 1fr', gap:20, alignItems:'center', marginTop:14 }}>
+            <div style={{ background:INK, borderRadius:30, padding:12, maxWidth:300 }}>
+              <div style={{ background:'#fff', borderRadius:22, textAlign:'center', padding:'24px 20px' }}>
+                <div style={{ fontWeight:800, fontSize:18, color:INK, direction:'ltr' }}><span style={{ color:PETROL }}>Repu</span><span style={{ color:TEAL }}>Care</span></div>
+                <h4 style={{ fontSize:17, fontWeight:800, margin:'10px 0 4px' }}>תודה שביקרת אצלנו!</h4>
+                <p style={{ color:MUTED, fontSize:13 }}>איך היה הביקור שלך ב{business.name}?</p>
+                <div style={{ color:STAR, fontSize:30, letterSpacing:6, margin:'14px 0' }}>★★★★★</div>
+                <a style={{ ...btn, display:'block', textAlign:'center' }} href={ratingLink} target="_blank" rel="noreferrer">פתח את מסך הדירוג ↗</a>
+                <div style={{ fontSize:11, color:MUTED, background:'#f4f8fa', borderRadius:10, padding:8, marginTop:12 }}>5–4 כוכבים → ביקורת בגוגל · 3 ומטה → פידבק פרטי אליך</div>
+              </div>
             </div>
-            <button style={{ ...ghost, marginTop:12 }} onClick={exportLeadsCsv}>⬇ ייצוא CSV</button>
-          </>}
-      </div>
+            <div style={{ color:'#3a4750', fontSize:14, lineHeight:1.7 }}>
+              <p>זה המסך שהלקוח מקבל ב‑SMS / QR אחרי הביקור. הוא חי — לחיצה תפתח את מסך הדירוג האמיתי שלך.</p>
+              <ul style={{ margin:'10px 0 0', paddingInlineStart:18, color:MUTED }}>
+                <li>מרוצה (4–5★) → מועבר ישירות לכתוב ביקורת בגוגל.</li>
+                <li>פחות מרוצה (1–3★) → מגיע אליך כפידבק פרטי, לא לפומבי.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
 
-      <div style={card}>
-        <h3 style={h3}>הגדרות העסק</h3>
-        <div style={goldRule}/>
-        <Settings business={business} onSave={async (b)=>{ const r=await post('/api/business', b, 'PATCH'); if(r.ok) router.refresh(); else alert(r.error||'שגיאה'); }} busy={busy} />
-      </div>
+        {/* settings */}
+        <div style={{ ...panel, marginBottom:18 }} id="settings">
+          <h3 style={h3}>הגדרות העסק</h3>
+          <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'10px 0 16px' }}/>
+          <Settings business={business} onSave={async (b)=>{ const r=await post('/api/business', b, 'PATCH'); if(r.ok) router.refresh(); else alert(r.error||'שגיאה'); }} busy={busy} />
+        </div>
 
-      <div style={{ ...card, textAlign:'center', background:'linear-gradient(135deg,#0b2330,#0b6f8e)', border:'none' }}>
-        {sub && (sub.status==='trialing'||sub.status==='active')
-          ? <p style={{ color:'#eafbf6', fontWeight:700, fontSize:15 }}>המנוי פעיל ✓ — {planLabel}</p>
-          : <>
-              <p style={{ color:'rgba(255,255,255,.92)', fontWeight:700, fontSize:15.5, marginBottom:4 }}>45 יום חינם — בלי התחייבות</p>
-              <p style={{ color:'rgba(255,255,255,.82)', marginBottom:14, fontSize:14 }}>ואז: ₪349 לחודש &nbsp;·&nbsp; או ₪3,560 לשנה <span style={{ color:'#ffe6a8', fontWeight:700 }}>(15% הנחה — חיסכון ₪628)</span></p>
-              <button style={{ ...btn, background:'#fff', color:PETROL }} disabled={busy} onClick={async()=>{ const r=await post('/api/checkout'); if(r.url) window.location.href=r.url; else alert(r.error||'שגיאה'); }}>הפעל מנוי (45 יום חינם)</button>
-            </>}
-      </div>
+        {/* subscription */}
+        <div style={{ ...panel, textAlign:'center', background:'linear-gradient(135deg,#0b2330,'+PETROL+')', border:'none' }}>
+          {sub && (sub.status==='trialing'||sub.status==='active')
+            ? <p style={{ color:'#eafbf6', fontWeight:700, fontSize:15 }}>המנוי פעיל ✓ — {planLabel}</p>
+            : <>
+                <p style={{ color:'rgba(255,255,255,.92)', fontWeight:700, fontSize:15.5, marginBottom:4 }}>45 יום חינם — בלי התחייבות</p>
+                <p style={{ color:'rgba(255,255,255,.82)', marginBottom:14, fontSize:14 }}>ואז: ₪300 + מע״מ לחודש &nbsp;·&nbsp; או ₪3,060 + מע״מ לשנה <span style={{ color:'#ffe6a8', fontWeight:700 }}>(15% הנחה — חיסכון ₪540)</span></p>
+                <button style={{ ...btn, background:'#fff', color:PETROL }} disabled={busy} onClick={async()=>{ const r=await post('/api/checkout'); if(r.url) window.location.href=r.url; else alert(r.error||'שגיאה'); }}>הפעל מנוי (45 יום חינם)</button>
+              </>}
+        </div>
 
-      <p style={{ textAlign:'center', color:'#9fb0b8', fontSize:12, marginTop:18 }}>RepuCare · ניהול מוניטין לעסקי שירות</p>
+        <p style={{ textAlign:'center', color:'#9fb0b8', fontSize:12, marginTop:18 }}>RepuCare · ניהול מוניטין לעסקי שירות</p>
+      </main>
+
+      <style>{`@media(max-width:1080px){.rc-kpis{grid-template-columns:repeat(2,1fr)!important}}@media(max-width:900px){.rc-shell{grid-template-columns:1fr!important}.rc-side{display:none!important}.rc-2col{grid-template-columns:1fr!important}}`}</style>
     </div>
-    </main>
   );
 }
 
-function Kpi({ label, value, accent }) {
+function Kpi({ icon, label, value, small, extra, delta, flat }) {
   return (
-    <div style={{ ...card, marginBottom:18, padding:0, overflow:'hidden' }}>
-      <div style={{ height:4, background:accent }}/>
-      <div style={{ padding:'18px 22px' }}>
-        <div style={{ color:MUTED, fontSize:12.5 }}>{label}</div>
-        <div style={{ fontSize:30, fontWeight:800, marginTop:4, color:INK, letterSpacing:'-.02em' }}>{value}</div>
+    <div style={{ ...panel, padding:'16px 16px 14px' }}>
+      <div style={{ color:MUTED, fontSize:12.5, marginBottom:8, display:'flex', alignItems:'center', gap:6 }}>
+        <span style={{ width:26, height:26, borderRadius:8, background:'linear-gradient(135deg,rgba(15,167,163,.13),rgba(11,111,142,.13))', display:'flex', alignItems:'center', justifyContent:'center' }}><Ico d={icon} s={15} stroke={PETROL}/></span>
+        {label}
       </div>
+      <div style={{ fontSize:27, fontWeight:800, letterSpacing:'-.02em', lineHeight:1 }}>{value}{small && <small style={{ fontSize:15, color:MUTED, fontWeight:600 }}>{small}</small>} {extra}</div>
+      <div style={{ fontSize:12, fontWeight:600, marginTop:6, color: flat?MUTED:POS }}>{delta}</div>
     </div>
   );
 }
+
+function GrowthChart({ months, maxReq }) {
+  const W=600, H=220, padL=36, padR=14, padB=28, padT=14;
+  const innerW = W-padL-padR, innerH = H-padT-padB;
+  const n = months.length;
+  const step = innerW / n;
+  const barW = Math.min(46, step*0.5);
+  const yReq = (v)=> padT + innerH - (v/maxReq)*innerH;
+  const yRate = (v)=> padT + innerH - (v/5)*innerH;
+  const cx = (i)=> padL + step*i + step/2;
+  const linePts = months.map((m,i)=> m.ratingAvg!=null ? (cx(i)+','+yRate(m.ratingAvg)) : null).filter(Boolean).join(' ');
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:'auto' }}>
+      <g stroke="#eef3f6" strokeWidth="1">
+        {[0,0.25,0.5,0.75,1].map((p,i)=><line key={i} x1={padL} y1={padT+innerH*p} x2={W-padR} y2={padT+innerH*p}/>)}
+      </g>
+      <g fill={TEAL} opacity="0.9">
+        {months.map((m,i)=>{ const h=Math.max(0,(innerH)-(yReq(m.reqN)-padT)); return <rect key={i} x={cx(i)-barW/2} y={yReq(m.reqN)} width={barW} height={Math.max(0,padT+innerH-yReq(m.reqN))} rx="6"/>; })}
+      </g>
+      {linePts && <polyline points={linePts} fill="none" stroke={GOLD} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>}
+      <g fill={GOLD}>{months.map((m,i)=> m.ratingAvg!=null ? <circle key={i} cx={cx(i)} cy={yRate(m.ratingAvg)} r="4"/> : null)}</g>
+      <g fill="#7d8d96" fontSize="13" fontFamily="Rubik" textAnchor="middle">
+        {months.map((m,i)=><text key={i} x={cx(i)} y={H-8}>{m.label}</text>)}
+      </g>
+    </svg>
+  );
+}
+
+function Src({ name, val, max, color, border, children, soonLabel }) {
+  return (
+    <div style={{ display:'flex', alignItems:'center', gap:12, padding:'11px 0', borderBottom:'1px solid '+LINE }}>
+      <div style={{ width:30, height:30, borderRadius:8, display:'flex', alignItems:'center', justifyContent:'center', flex:'none', background:color, ...(border?{border:'1px solid '+LINE}:{}) }}>{children}</div>
+      <div style={{ fontSize:13, color:MUTED, minWidth:74 }}>{name}</div>
+      {soonLabel
+        ? <><div style={{ flex:1, height:8, borderRadius:999, background:'#eef3f6' }}/><span style={soon}>{soonLabel}</span></>
+        : <><div style={{ flex:1, height:8, borderRadius:999, background:'#eef3f6', overflow:'hidden' }}><i style={{ display:'block', height:'100%', borderRadius:999, width:((val/max)*100)+'%', background:'linear-gradient(90deg,'+TEAL+','+PETROL+')' }}/></div><b style={{ fontSize:14 }}>{val}</b></>}
+    </div>
+  );
+}
+
 function SendRequest({ onSend, busy }) {
   const [name,setName]=useState(''); const [contact,setContact]=useState(''); const [channel,setChannel]=useState('sms'); const [msg,setMsg]=useState(null);
   return (
@@ -228,6 +425,7 @@ function SendRequest({ onSend, busy }) {
     </div>
   );
 }
+
 function Settings({ business, onSave, busy }) {
   const [name,setName]=useState(business.name||''); const [city,setCity]=useState(business.city||'');
   const [type,setType]=useState(business.business_type||'dental'); const [google,setGoogle]=useState(business.google_review_url||'');
@@ -243,14 +441,15 @@ function Settings({ business, onSave, busy }) {
     </div>
   );
 }
+
 function Onboard({ onCreate, email, logout, busy }) {
   const [name,setName]=useState(''); const [city,setCity]=useState(''); const [type,setType]=useState('salon'); const [google,setGoogle]=useState('');
-  const page = { minHeight:'100vh', direction:'rtl', display:'flex', alignItems:'center', justifyContent:'center', background:'radial-gradient(125% 125% at 50% 0%, #f4fafb 0%, #e7eff4 55%, #dde8ee 100%)', padding:'24px 16px' };
+  const page = { minHeight:'100vh', direction:'rtl', display:'flex', alignItems:'center', justifyContent:'center', background:'radial-gradient(125% 125% at 50% 0%, #f4fafb 0%, #e7eff4 55%, #dde8ee 100%)', padding:'24px 16px', fontFamily:'Rubik, system-ui, Arial, sans-serif' };
   return (
     <main style={page}>
-      <div style={{ ...card, width:'100%', maxWidth:520, marginBottom:0 }}>
-        <Logo/>
-        <div style={goldRule}/>
+      <div style={{ ...panel, width:'100%', maxWidth:520 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:9 }}><RcMark s={34}/><span style={{ fontWeight:800, fontSize:23, letterSpacing:'-.03em' }}><span style={{ color:PETROL }}>Repu</span><span style={{ color:TEAL }}>Care</span></span></div>
+        <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'14px 0 16px' }}/>
         <h2 style={{ fontSize:20, fontWeight:800, color:INK }}>ברוך הבא ל‑RepuCare 👋</h2>
         <p style={{ color:MUTED, margin:'6px 0 16px' }}>בוא נקים את העסק שלך (דקה).</p>
         <label style={{ fontSize:13, fontWeight:600, color:INK }}>שם העסק</label><input style={inp} value={name} onChange={e=>setName(e.target.value)} />
@@ -258,7 +457,7 @@ function Onboard({ onCreate, email, logout, busy }) {
         <label style={{ fontSize:13, fontWeight:600, color:INK }}>סוג עסק</label>
         <select style={inp} value={type} onChange={e=>setType(e.target.value)}>{Object.entries(TYPES).map(([k,v])=><option key={k} value={k}>{v}</option>)}</select>
         <label style={{ fontSize:13, fontWeight:600, color:INK }}>קישור ביקורת בגוגל (אפשר בהמשך)</label><input style={{ ...inp, direction:'ltr', textAlign:'left' }} value={google} onChange={e=>setGoogle(e.target.value)} placeholder="https://g.page/r/..." />
-        <button style={{ ...btn, width:'100%', marginTop:4 }} disabled={busy} onClick={()=>{ if(!name){alert('מלא שם עסק');return;} onCreate({ name, city, business_type:type, google_review_url:google }); }}>צור עסק</button>
+        <button style={{ ...btn, width:'100%', justifyContent:'center', marginTop:4 }} disabled={busy} onClick={()=>{ if(!name){alert('מלא שם עסק');return;} onCreate({ name, city, business_type:type, google_review_url:google }); }}>צור עסק</button>
         <div style={{ marginTop:12, fontSize:12, color:MUTED }}>{email} · <span style={{ cursor:'pointer', color:PETROL }} onClick={logout}>יציאה</span></div>
       </div>
     </main>
