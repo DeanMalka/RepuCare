@@ -6,7 +6,6 @@ import { browserClient } from '../../lib/supabaseBrowser';
 const TYPES = { dental:'מרפאת שיניים', salon:'מספרה / ברבר', dog:'מספרת כלבים', garage:'מוסך', play:'משחקייה', event:'אולם אירועים', aesthetic:'אסתטיקה' };
 const HEB_M = ['ינו׳','פבר׳','מרץ','אפר׳','מאי','יוני','יולי','אוג׳','ספט׳','אוק׳','נוב׳','דצמ׳'];
 
-// palette (from the approved mockup)
 const INK='#0a1c26', INK2='#0e2733', PETROL='#0b6f8e', TEAL='#0fa7a3', TEALL='#5fd6d2', GOLD='#c4a35a', STAR='#f5b50a', POS='#10936f', MUTED='#5f717b', LINE='#e4edf2';
 
 const panel = { background:'#fff', border:'1px solid '+LINE, borderRadius:18, padding:20, boxShadow:'0 14px 36px -18px rgba(10,40,52,.28)' };
@@ -58,7 +57,6 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
     return <Onboard onCreate={async (b)=>{ const r=await post('/api/business', b); if(r.ok) router.refresh(); else alert(r.error||'שגיאה'); }} email={email} logout={logout} busy={busy} />;
   }
 
-  // ---- derived REAL metrics ----
   const ratingEvents = events.filter(e=>e.type==='rating').map(e=> Number(e.meta && e.meta.rating)).filter(n=>n>=1&&n<=5);
   const fbRatings = feedback.map(f=>f.rating).filter(n=>typeof n==='number' && n>=1 && n<=5);
   const allRatings = [...ratingEvents, ...fbRatings];
@@ -71,7 +69,6 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
   const ratingLink = (appUrl||'') + '/r/' + business.rating_token;
   const planLabel = sub ? (sub.status==='trialing' ? 'בתקופת ניסיון (45 יום)' : sub.status==='active' ? 'מנוי פעיל' : sub.status) : 'ללא מנוי פעיל';
 
-  // ---- 6-month series from real timestamps ----
   const base = new Date(); base.setDate(1);
   const months = [];
   for (let i=5;i>=0;i--){
@@ -104,7 +101,6 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
 
   return (
     <div style={shell} className="rc-shell">
-      {/* ---------- sidebar ---------- */}
       <aside style={side} className="rc-side">
         <div style={{ display:'flex', alignItems:'center', gap:9, padding:'6px 10px 22px', direction:'ltr' }}>
           <span style={{ fontWeight:800, fontSize:20, letterSpacing:'-.03em', color:'#fff' }}>RepuCare</span>
@@ -112,7 +108,7 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
         </div>
         <nav style={{ display:'flex', flexDirection:'column', gap:4 }}>
           <a style={navA(true)} href="#top"><Ico d={I.grid}/> דשבורד</a>
-          <a style={navA(false)} href="#send"><Ico d={I.send}/> בקשות ביקורת</a>
+          <a style={navA(false)} href="#customers"><Ico d={I.send}/> לקוחות ושליחה</a>
           <a style={navA(false)} href="#reviews"><Ico d={I.star}/> ביקורות</a>
           <a style={navA(false)} href="#feedback"><Ico d={I.chat}/> פידבק פרטי {openFb>0 && <span style={{ marginInlineStart:'auto', background:'#e0913a', color:'#fff', fontSize:11, borderRadius:999, padding:'1px 7px' }}>{openFb}</span>}</a>
           <a style={navA(false)} href="#reports"><Ico d={I.bars}/> דוחות</a>
@@ -128,7 +124,6 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
         </div>
       </aside>
 
-      {/* ---------- main ---------- */}
       <main style={main} id="top">
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:16, marginBottom:22, flexWrap:'wrap' }}>
           <div>
@@ -137,12 +132,11 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
           </div>
           <div style={{ display:'flex', alignItems:'center', gap:12 }}>
             <span style={{ fontSize:12.5, color:PETROL, background:'#fff', border:'1px solid #dcebf0', borderRadius:999, padding:'6px 14px', fontWeight:600 }}>{planLabel}</span>
-            <a style={btn} href="#send"><Ico d={I.send} s={16} stroke="#fff"/> שלח בקשת ביקורת</a>
+            <a style={btn} href="#customers"><Ico d={I.send} s={16} stroke="#fff"/> שלח בקשות</a>
             <button style={{ ...ghost }} onClick={logout}>יציאה</button>
           </div>
         </div>
 
-        {/* KPIs */}
         <div className="rc-kpis" style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:14, marginBottom:18 }}>
           <Kpi icon={I.star} label="דירוג ממוצע" value={avgRating!=null? avgRating.toFixed(1) : '—'}
                extra={avgRating!=null ? <span style={{ color:STAR, fontSize:13, letterSpacing:1 }}>{stars(avgRating)}</span> : null}
@@ -155,7 +149,6 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
           <Kpi icon={I.shield} label="נחסם מפומבי" value={caughtPrivate} delta="פידבק פרטי" flat />
         </div>
 
-        {/* chart + sources */}
         <div className="rc-2col" style={{ display:'grid', gridTemplateColumns:'1.5fr 1fr', gap:18, marginBottom:18 }}>
           <div style={panel}>
             <div style={{ marginBottom:8 }}><h3 style={h3}>פעילות ודירוג</h3><div style={{ color:MUTED, fontSize:12.5 }}>6 חודשים אחרונים</div></div>
@@ -174,6 +167,10 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
             <Src name="Google" val={googleCount} max={Math.max(1,googleCount)} color="#fff" border>
               <svg width="17" height="17" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.7 1.2 9.2 3.6l6.8-6.8C35.9 2.4 30.5 0 24 0 14.6 0 6.5 5.4 2.6 13.2l8 6.2C12.4 13.7 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M47 24.5c0-1.6-.2-3.1-.4-4.5H24v9h12.9c-.6 3-2.3 5.5-4.8 7.2l7.7 6c4.5-4.2 7.2-10.4 7.2-17.7z"/><path fill="#FBBC05" d="M10.5 28.6c-.5-1.5-.8-3-.8-4.6s.3-3.1.8-4.6l-8-6.2C.9 16.5 0 20.1 0 24s.9 7.5 2.6 10.8z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.7-6c-2.1 1.5-4.9 2.3-8.2 2.3-6.3 0-11.6-4.2-13.5-9.9l-8 6.2C6.5 42.6 14.6 48 24 48z"/></svg>
             </Src>
+            {business.pro_url && business.pro_consent &&
+              <Src name="המקצוענים" val={business.pro_reviews_count||0} max={Math.max(1,business.pro_reviews_count||0,googleCount)} color={PETROL}>
+                <span style={{ color:'#fff', fontWeight:800, fontSize:12 }}>פ</span>
+              </Src>}
             <Src name="Facebook" soonLabel="בקרוב · שלב 2" color="#1877f2"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06C2 17 5.66 21.13 10.44 21.94v-7H7.9v-2.94h2.54V9.85c0-2.52 1.5-3.91 3.78-3.91 1.1 0 2.24.2 2.24.2v2.46H15.2c-1.24 0-1.63.78-1.63 1.57v1.89h2.78l-.44 2.94h-2.34v7C18.34 21.13 22 17 22 12.06"/></svg></Src>
             <Src name="Instagram" soonLabel="בקרוב · שלב 2" color="linear-gradient(135deg,#f09433,#bc1888)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="#fff" stroke="none"/></svg></Src>
             <p style={{ fontSize:12, color:MUTED, marginTop:14 }}>בשלב 2 נאחד גם פייסבוק ואינסטגרם — וכל תגובה, בכל ערוץ, תיספר כאן.</p>
@@ -203,7 +200,6 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
           </div>
         )}
 
-        {/* reviews + private feedback */}
         <div className="rc-2col" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:18, marginBottom:18 }}>
           <div style={panel} id="reviews">
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}><h3 style={h3}>ביקורות גוגל אחרונות</h3></div>
@@ -241,7 +237,6 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
           </div>
         </div>
 
-        {/* share link */}
         <div style={{ ...panel, marginBottom:18 }} id="share">
           <h3 style={h3}>קישור הדירוג שלך</h3>
           <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'10px 0 16px' }}/>
@@ -253,13 +248,6 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
           <p style={{ fontSize:12.5, color:MUTED, marginTop:10 }}>תלו את ה‑QR בעסק או שלחו את הקישור ללקוחות אחרי השירות. דירוג גבוה → גוגל, נמוך → פידבק פרטי אליכם.</p>
         </div>
 
-        {/* send request */}
-        <div style={{ ...panel, marginBottom:18 }} id="send">
-          <h3 style={h3}>שליחת בקשת ביקורת ללקוח</h3>
-          <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'10px 0 16px' }}/>
-          <SendRequest onSend={async (b)=>{ const r=await post('/api/requests', b); if(r.ok) router.refresh(); else alert(r.error||'שגיאה'); return r; }} busy={busy} />
-        </div>
-
         {/* customers + bulk send */}
         <div style={{ ...panel, marginBottom:18 }} id="customers">
           <h3 style={h3}>לקוחות ושליחה מרוכזת</h3>
@@ -267,7 +255,13 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
           <Customers customers={customers} post={post} router={router} busy={busy} />
         </div>
 
-        {/* survey insights */}
+        {/* single send request */}
+        <div style={{ ...panel, marginBottom:18 }} id="send">
+          <h3 style={h3}>שליחת בקשה ללקוח בודד</h3>
+          <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'10px 0 16px' }}/>
+          <SendRequest onSend={async (b)=>{ const r=await post('/api/requests', b); if(r.ok) router.refresh(); else alert(r.error||'שגיאה'); return r; }} busy={busy} />
+        </div>
+
         <div style={{ ...panel, marginBottom:18 }} id="reports">
           <h3 style={h3}>תובנות מהסקר {surveyCount>0 && <span style={{ fontSize:12, color:MUTED, fontWeight:500 }}>· {surveyCount} תשובות</span>}</h3>
           <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'10px 0 16px' }}/>
@@ -283,7 +277,6 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
               </div>}
         </div>
 
-        {/* recent requests */}
         <div style={{ ...panel, marginBottom:18 }} id="requests">
           <h3 style={h3}>בקשות אחרונות</h3>
           <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'10px 0 16px' }}/>
@@ -296,7 +289,6 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
           ))}
         </div>
 
-        {/* leads — ADMIN ONLY */}
         {isAdmin && (
           <div style={{ ...panel, marginBottom:18 }} id="leads">
             <h3 style={h3}>לידים נכנסים <span style={{ fontSize:11, color:'#fff', background:PETROL, borderRadius:999, padding:'2px 9px', marginInlineStart:6 }}>אדמין</span> {leads.length>0 && <span style={{ fontSize:12, color:'#fff', background:TEAL, borderRadius:999, padding:'2px 9px', marginInlineStart:6 }}>{leads.length}</span>}</h3>
@@ -331,38 +323,12 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
           </div>
         )}
 
-        {/* patient preview (uses the real rating link) */}
-        <div style={{ ...panel, marginBottom:18 }}>
-          <h3 style={{ ...h3, color:MUTED, fontWeight:700 }}>כך הלקוח רואה את זה</h3>
-          <div style={{ display:'grid', gridTemplateColumns:'320px 1fr', gap:20, alignItems:'center', marginTop:14 }}>
-            <div style={{ background:INK, borderRadius:30, padding:12, maxWidth:300 }}>
-              <div style={{ background:'#fff', borderRadius:22, textAlign:'center', padding:'24px 20px' }}>
-                <div style={{ fontWeight:800, fontSize:18, color:INK, direction:'ltr' }}><span style={{ color:PETROL }}>Repu</span><span style={{ color:TEAL }}>Care</span></div>
-                <h4 style={{ fontSize:17, fontWeight:800, margin:'10px 0 4px' }}>תודה שביקרת אצלנו!</h4>
-                <p style={{ color:MUTED, fontSize:13 }}>איך היה הביקור שלך ב{business.name}?</p>
-                <div style={{ color:STAR, fontSize:30, letterSpacing:6, margin:'14px 0' }}>★★★★★</div>
-                <a style={{ ...btn, display:'block', textAlign:'center' }} href={ratingLink} target="_blank" rel="noreferrer">פתח את מסך הדירוג ↗</a>
-                <div style={{ fontSize:11, color:MUTED, background:'#f4f8fa', borderRadius:10, padding:8, marginTop:12 }}>5–4 כוכבים → ביקורת בגוגל · 3 ומטה → פידבק פרטי אליך</div>
-              </div>
-            </div>
-            <div style={{ color:'#3a4750', fontSize:14, lineHeight:1.7 }}>
-              <p>זה המסך שהלקוח מקבל ב‑SMS / QR אחרי הביקור. הוא חי — לחיצה תפתח את מסך הדירוג האמיתי שלך.</p>
-              <ul style={{ margin:'10px 0 0', paddingInlineStart:18, color:MUTED }}>
-                <li>מרוצה (4–5★) → מועבר ישירות לכתוב ביקורת בגוגל.</li>
-                <li>פחות מרוצה (1–3★) → מגיע אליך כפידבק פרטי, לא לפומבי.</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        {/* settings */}
         <div style={{ ...panel, marginBottom:18 }} id="settings">
           <h3 style={h3}>הגדרות העסק</h3>
           <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'10px 0 16px' }}/>
           <Settings business={business} onSave={async (b)=>{ const r=await post('/api/business', b, 'PATCH'); if(!r.ok){ alert(r.error||'שגיאה'); return; } if(b.pro_url && b.pro_consent){ await post('/api/pro'); } router.refresh(); }} busy={busy} />
         </div>
 
-        {/* subscription */}
         <div style={{ ...panel, textAlign:'center', background:'linear-gradient(135deg,#0b2330,'+PETROL+')', border:'none' }}>
           {sub && (sub.status==='trialing'||sub.status==='active')
             ? <p style={{ color:'#eafbf6', fontWeight:700, fontSize:15 }}>המנוי פעיל ✓ — {planLabel}</p>
@@ -410,7 +376,7 @@ function GrowthChart({ months, maxReq }) {
         {[0,0.25,0.5,0.75,1].map((p,i)=><line key={i} x1={padL} y1={padT+innerH*p} x2={W-padR} y2={padT+innerH*p}/>)}
       </g>
       <g fill={TEAL} opacity="0.9">
-        {months.map((m,i)=>{ const h=Math.max(0,(innerH)-(yReq(m.reqN)-padT)); return <rect key={i} x={cx(i)-barW/2} y={yReq(m.reqN)} width={barW} height={Math.max(0,padT+innerH-yReq(m.reqN))} rx="6"/>; })}
+        {months.map((m,i)=>{ return <rect key={i} x={cx(i)-barW/2} y={yReq(m.reqN)} width={barW} height={Math.max(0,padT+innerH-yReq(m.reqN))} rx="6"/>; })}
       </g>
       {linePts && <polyline points={linePts} fill="none" stroke={GOLD} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>}
       <g fill={GOLD}>{months.map((m,i)=> m.ratingAvg!=null ? <circle key={i} cx={cx(i)} cy={yRate(m.ratingAvg)} r="4"/> : null)}</g>
@@ -429,29 +395,6 @@ function Src({ name, val, max, color, border, children, soonLabel }) {
       {soonLabel
         ? <><div style={{ flex:1, height:8, borderRadius:999, background:'#eef3f6' }}/><span style={soon}>{soonLabel}</span></>
         : <><div style={{ flex:1, height:8, borderRadius:999, background:'#eef3f6', overflow:'hidden' }}><i style={{ display:'block', height:'100%', borderRadius:999, width:((val/max)*100)+'%', background:'linear-gradient(90deg,'+TEAL+','+PETROL+')' }}/></div><b style={{ fontSize:14 }}>{val}</b></>}
-    </div>
-  );
-}
-
-function SendRequest({ onSend, busy }) {
-  const [name,setName]=useState(''); const [contact,setContact]=useState(''); const [channel,setChannel]=useState('sms'); const [msg,setMsg]=useState(null);
-  return (
-    <div>
-      <div style={{ display:'flex', gap:10, flexWrap:'wrap', alignItems:'flex-end' }}>
-        <div style={{ flex:1, minWidth:140 }}><label style={{ fontSize:13, fontWeight:600, color:INK }}>שם הלקוח</label><input style={inp} value={name} onChange={e=>setName(e.target.value)} /></div>
-        <div style={{ flex:1, minWidth:140 }}><label style={{ fontSize:13, fontWeight:600, color:INK }}>טלפון / מייל</label><input style={inp} value={contact} onChange={e=>setContact(e.target.value)} /></div>
-        <select style={{ ...inp, width:120 }} value={channel} onChange={e=>setChannel(e.target.value)}><option value="sms">SMS</option><option value="email">אימייל</option><option value="whatsapp">וואטסאפ</option></select>
-        <button style={btn} disabled={busy} onClick={async()=>{ if(!name&&!contact){alert('מלא שם או טלפון');return;} const r=await onSend({name,contact,channel}); if(r&&r.ok){ setMsg(r.returning ? { t:'returning', v:r.visitCount } : { t:'new' }); setName(''); setContact(''); } }}>שלח בקשה</button>
-      </div>
-      {msg && (
-        <div style={{ marginTop:12, padding:'10px 14px', borderRadius:12, fontSize:13.5, lineHeight:1.6,
-          background: msg.t==='returning' ? '#fff7e8' : '#eafaf4',
-          border:'1px solid '+(msg.t==='returning' ? '#f0e2c0' : '#cdeede'), color:INK }}>
-          {msg.t==='returning'
-            ? <>👋 <b>לקוח חוזר</b> (ביקור מס׳ {msg.v})! לקוח שחוזר = סימן ששירותכם טוב. מומלץ לשלוח לו <b>"תודה שבחרת בנו שוב"</b> — ואם כבר השאיר ביקורת בעבר, אין צורך לבקש שוב.</>
-            : <>✓ נשלחה בקשת ביקורת ללקוח חדש.</>}
-        </div>
-      )}
     </div>
   );
 }
@@ -552,6 +495,29 @@ function Customers({ customers = [], post, router, busy }) {
             </div>
             <p style={{ fontSize:11.5, color:MUTED, marginTop:10 }}>שליחה אוטומטית ב‑WhatsApp תופעל ברגע שנחבר את חשבון השליחה; עד אז הבקשות נרשמות בתור.</p>
           </>}
+    </div>
+  );
+}
+
+function SendRequest({ onSend, busy }) {
+  const [name,setName]=useState(''); const [contact,setContact]=useState(''); const [channel,setChannel]=useState('sms'); const [msg,setMsg]=useState(null);
+  return (
+    <div>
+      <div style={{ display:'flex', gap:10, flexWrap:'wrap', alignItems:'flex-end' }}>
+        <div style={{ flex:1, minWidth:140 }}><label style={{ fontSize:13, fontWeight:600, color:INK }}>שם הלקוח</label><input style={inp} value={name} onChange={e=>setName(e.target.value)} /></div>
+        <div style={{ flex:1, minWidth:140 }}><label style={{ fontSize:13, fontWeight:600, color:INK }}>טלפון / מייל</label><input style={inp} value={contact} onChange={e=>setContact(e.target.value)} /></div>
+        <select style={{ ...inp, width:120 }} value={channel} onChange={e=>setChannel(e.target.value)}><option value="sms">SMS</option><option value="email">אימייל</option><option value="whatsapp">וואטסאפ</option></select>
+        <button style={btn} disabled={busy} onClick={async()=>{ if(!name&&!contact){alert('מלא שם או טלפון');return;} const r=await onSend({name,contact,channel}); if(r&&r.ok){ setMsg(r.returning ? { t:'returning', v:r.visitCount } : { t:'new' }); setName(''); setContact(''); } }}>שלח בקשה</button>
+      </div>
+      {msg && (
+        <div style={{ marginTop:12, padding:'10px 14px', borderRadius:12, fontSize:13.5, lineHeight:1.6,
+          background: msg.t==='returning' ? '#fff7e8' : '#eafaf4',
+          border:'1px solid '+(msg.t==='returning' ? '#f0e2c0' : '#cdeede'), color:INK }}>
+          {msg.t==='returning'
+            ? <>👋 <b>לקוח חוזר</b> (ביקור מס׳ {msg.v})! מומלץ לשלוח לו <b>"תודה שבחרת בנו שוב"</b> — ואם כבר השאיר ביקורת בעבר, אין צורך לבקש שוב.</>
+            : <>✓ נשלחה בקשת ביקורת ללקוח חדש.</>}
+        </div>
+      )}
     </div>
   );
 }

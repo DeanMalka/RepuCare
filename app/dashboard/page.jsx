@@ -5,7 +5,6 @@ import DashboardClient from './DashboardClient';
 export const dynamic = 'force-dynamic';
 
 // Who may see the "leads" panel (RepuCare's own sales prospects from the landing page).
-// Comma-separated emails in env. A normal business owner is NOT an admin and never sees leads.
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
   .split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
 
