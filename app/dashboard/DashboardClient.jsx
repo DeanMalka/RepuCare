@@ -43,7 +43,7 @@ function Ico({ d, s=19, stroke='currentColor' }) {
 }
 function stars(v){ const n=Math.round(v||0); return '★★★★★'.slice(0,n)+'☆☆☆☆☆'.slice(0,5-n); }
 
-export default function DashboardClient({ email, isAdmin=false, business, feedback=[], requests=[], reviews=[], events=[], sub, appUrl, leads = [] }) {
+export default function DashboardClient({ email, isAdmin=false, business, feedback=[], requests=[], reviews=[], events=[], sub, appUrl, leads = [], customers = [] }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   async function post(url, body, method='POST') {
@@ -260,6 +260,13 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
           <SendRequest onSend={async (b)=>{ const r=await post('/api/requests', b); if(r.ok) router.refresh(); else alert(r.error||'שגיאה'); return r; }} busy={busy} />
         </div>
 
+        {/* customers + bulk send */}
+        <div style={{ ...panel, marginBottom:18 }} id="customers">
+          <h3 style={h3}>לקוחות ושליחה מרוכזת</h3>
+          <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'10px 0 16px' }}/>
+          <Customers customers={customers} post={post} router={router} busy={busy} />
+        </div>
+
         {/* survey insights */}
         <div style={{ ...panel, marginBottom:18 }} id="reports">
           <h3 style={h3}>תובנות מהסקר {surveyCount>0 && <span style={{ fontSize:12, color:MUTED, fontWeight:500 }}>· {surveyCount} תשובות</span>}</h3>
@@ -445,6 +452,106 @@ function SendRequest({ onSend, busy }) {
             : <>✓ נשלחה בקשת ביקורת ללקוח חדש.</>}
         </div>
       )}
+    </div>
+  );
+}
+
+function Customers({ customers = [], post, router, busy }) {
+  const [rows, setRows] = useState([]);
+  const [consent, setConsent] = useState(false);
+  const [sel, setSel] = useState({});
+  const [msg, setMsg] = useState(null);
+
+  function parseList(text) {
+    const out = [];
+    String(text || '').split(/\r?\n/).forEach(line => {
+      const t = line.trim(); if (!t) return;
+      if (/^(name|שם|phone|טלפון|נייד)/i.test(t)) return;
+      const parts = t.split(/[,;\t]/).map(s => s.trim()).filter(Boolean);
+      if (!parts.length) return;
+      let phone = parts.find(p => p.replace(/[^\d]/g, '').length >= 9);
+      let name = parts.find(p => p !== phone) || '';
+      if (parts.length === 1) { phone = parts[0]; name = ''; }
+      if (phone) out.push({ name, phone });
+    });
+    return out;
+  }
+  function onFile(e) {
+    const f = e.target.files && e.target.files[0]; if (!f) return;
+    const r = new FileReader(); r.onload = () => setRows(parseList(String(r.result))); r.readAsText(f);
+  }
+  async function doImport() {
+    if (!rows.length) { alert('אין שורות לייבוא'); return; }
+    if (!consent) { alert('צריך לאשר שיש לך הסכמת הלקוחות'); return; }
+    const r = await post('/api/customers', { action: 'import', customers: rows, consent: true });
+    if (r && r.ok) { setMsg('יובאו ' + r.imported + ' לקוחות' + (r.skipped ? ' (' + r.skipped + ' דולגו)' : '')); setRows([]); setConsent(false); router.refresh(); }
+    else alert((r && r.error) || 'שגיאה בייבוא');
+  }
+  const ids = Object.keys(sel).filter(k => sel[k]);
+  const sendable = customers.filter(c => !c.do_not_contact);
+  function toggleAll() { if (ids.length === sendable.length && sendable.length) setSel({}); else { const n = {}; sendable.forEach(c => n[c.id] = true); setSel(n); } }
+  async function doSend() {
+    if (!ids.length) { alert('סמן לפחות לקוח אחד'); return; }
+    const r = await post('/api/send', { ids });
+    if (r && r.ok) {
+      setMsg(r.pendingProvider
+        ? ('נרשמו ' + r.queued + ' בקשות בתור — יישלחו אוטומטית ברגע שנחבר את WhatsApp')
+        : ('נשלחו ' + r.sent + ' הודעות' + (r.failed ? ' · ' + r.failed + ' נכשלו' : '')));
+      setSel({}); router.refresh();
+    } else alert((r && r.error) || 'שגיאה בשליחה');
+  }
+
+  return (
+    <div>
+      <div style={{ background:'#f7fbfc', border:'1px solid #e7f0f3', borderRadius:14, padding:'14px 16px', marginBottom:16 }}>
+        <div style={{ fontSize:14, fontWeight:700, color:INK, marginBottom:8 }}>ייבוא רשימת לקוחות</div>
+        <p style={{ fontSize:12.5, color:MUTED, marginBottom:10 }}>העלה קובץ CSV או הדבק שורות בפורמט <b>שם,טלפון</b> (שורה לכל לקוח).</p>
+        <input type="file" accept=".csv,text/csv,text/plain" onChange={onFile} style={{ fontSize:13, marginBottom:8, display:'block' }} />
+        <textarea placeholder={"דנה לוי,050-1234567\nיוסי כהן,0529876543"} onChange={e=>setRows(parseList(e.target.value))} style={{ ...inp, minHeight:70, direction:'ltr', textAlign:'left' }} />
+        <label style={{ display:'flex', gap:8, alignItems:'flex-start', fontSize:12.5, color:MUTED, cursor:'pointer', margin:'2px 0 10px' }}>
+          <input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)} style={{ width:'auto', marginTop:3, flex:'none' }} />
+          <span>אני מאשר/ת שקיבלתי את הסכמת הלקוחות לקבל הודעות מהעסק (חוק התקשורת — תיקון 40).</span>
+        </label>
+        <button style={{ ...btn, opacity: busy?0.7:1 }} disabled={busy} onClick={doImport}>ייבא {rows.length ? '(' + rows.length + ')' : ''}</button>
+      </div>
+
+      {msg && <div style={{ marginBottom:12, padding:'9px 13px', borderRadius:10, fontSize:13, background:'#eafaf4', border:'1px solid #cdeede', color:INK }}>{msg}</div>}
+
+      {customers.length === 0
+        ? <p style={{ color:MUTED, fontSize:14 }}>עוד אין לקוחות. ייבא רשימה למעלה כדי להתחיל.</p>
+        : <>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:8, marginBottom:8 }}>
+              <button style={ghost} onClick={toggleAll}>{ids.length === sendable.length && sendable.length ? 'נקה בחירה' : 'בחר הכל'}</button>
+              <button style={{ ...btn, opacity:(busy||!ids.length)?0.6:1 }} disabled={busy||!ids.length} onClick={doSend}>שגר לנבחרים ({ids.length})</button>
+            </div>
+            <div style={{ overflowX:'auto', maxHeight:360, overflowY:'auto' }}>
+              <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13.5 }}>
+                <thead><tr style={{ color:MUTED }}>
+                  <th style={{ padding:'6px 8px' }}></th>
+                  <th style={{ padding:'6px 8px', fontWeight:600, textAlign:'right' }}>שם</th>
+                  <th style={{ padding:'6px 8px', fontWeight:600, textAlign:'right' }}>טלפון</th>
+                  <th style={{ padding:'6px 8px', fontWeight:600, textAlign:'right' }}>ביקורים</th>
+                  <th style={{ padding:'6px 8px', fontWeight:600, textAlign:'right' }}>סטטוס</th>
+                </tr></thead>
+                <tbody>
+                  {customers.map(c => (
+                    <tr key={c.id} style={{ borderTop:'1px solid '+LINE, opacity:c.do_not_contact?0.5:1 }}>
+                      <td style={{ padding:'7px 8px' }}><input type="checkbox" disabled={c.do_not_contact} checked={!!sel[c.id]} onChange={e=>setSel(s=>({ ...s, [c.id]: e.target.checked }))} /></td>
+                      <td style={{ padding:'7px 8px', color:INK }}>{c.name || '—'}</td>
+                      <td style={{ padding:'7px 8px', color:PETROL, direction:'ltr', textAlign:'right' }}>{c.phone}</td>
+                      <td style={{ padding:'7px 8px', color:MUTED }}>{c.visit_count || 1}</td>
+                      <td style={{ padding:'7px 8px' }}>
+                        {c.do_not_contact
+                          ? <span style={{ fontSize:11, color:'#c0552d' }}>הוסר</span>
+                          : <span style={{ fontSize:11.5, color:PETROL, cursor:'pointer' }} onClick={async()=>{ await post('/api/customers',{action:'optout',id:c.id,value:true}); router.refresh(); }}>הסר</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p style={{ fontSize:11.5, color:MUTED, marginTop:10 }}>שליחה אוטומטית ב‑WhatsApp תופעל ברגע שנחבר את חשבון השליחה; עד אז הבקשות נרשמות בתור.</p>
+          </>}
     </div>
   );
 }
