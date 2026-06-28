@@ -25,7 +25,7 @@ export async function PATCH(req) {
     return NextResponse.json({ ok: true });
   }
   const patch = {};
-  ['name','city','business_type','google_review_url','message_template','channels'].forEach(k => { if (b[k] !== undefined) patch[k] = b[k]; });
+  ['name','city','business_type','google_review_url','message_template','channels','pro_url','pro_consent'].forEach(k => { if (b[k] !== undefined) patch[k] = b[k]; });
   const { error } = await supa.from('businesses').update(patch).eq('owner_id', user.id);
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
   return NextResponse.json({ ok: true });
