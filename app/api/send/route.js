@@ -9,8 +9,7 @@ export const dynamic = 'force-dynamic';
 // A (default): shared RepuCare WABA from env. B (future): the business's own WABA.
 function resolveSender(biz) {
   if (biz.sender_mode === 'own' && biz.waba_phone_id && process.env.WHATSAPP_OWN_TOKENS) {
-    // B — per-business sender. Token resolution is wired when the premium add-on ships.
-    return null; // not active yet
+    return null; // B — per-business sender; activated when the premium add-on ships.
   }
   const phoneId = process.env.WHATSAPP_SHARED_PHONE_ID;
   const token = process.env.WHATSAPP_SHARED_TOKEN;
@@ -23,7 +22,8 @@ function resolveSender(biz) {
 }
 
 // Send one WhatsApp template message via Cloud API. Returns {id} or {error}.
-async function sendWhatsApp(sender, toE164, name, link) {
+// Template body has 3 variables: {{1}} customer name, {{2}} business name, {{3}} review link.
+async function sendWhatsApp(sender, toE164, name, bizName, link) {
   const to = toE164.replace(/^\+/, '');
   try {
     const res = await fetch(`https://graph.facebook.com/v20.0/${sender.phoneId}/messages`, {
@@ -38,6 +38,7 @@ async function sendWhatsApp(sender, toE164, name, link) {
           language: { code: sender.lang },
           components: [{ type: 'body', parameters: [
             { type: 'text', text: name || 'לקוח' },
+            { type: 'text', text: bizName || 'העסק' },
             { type: 'text', text: link },
           ] }],
         },
@@ -81,11 +82,11 @@ export async function POST(req) {
   for (const c of targets) {
     let status = 'queued', provider_msg_id = null, error = null;
     if (sender) {
-      const r = await sendWhatsApp(sender, c.phone, c.name, link);
+      const r = await sendWhatsApp(sender, c.phone, c.name, biz.name, link);
       if (r.error) { status = 'failed'; error = String(r.error).slice(0, 300); failed++; }
       else { status = 'sent'; provider_msg_id = r.id; sent++; }
     } else {
-      queued++; // no sender configured yet — request is recorded, ready to fire once WhatsApp is connected.
+      queued++; // no sender configured yet — recorded, ready to fire once WhatsApp is connected.
     }
     await supa.from('review_requests').insert({
       business_id: biz.id, customer_name: c.name || null, contact: c.phone,
