@@ -3,7 +3,22 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { browserClient } from '../../lib/supabaseBrowser';
 
-const TYPES = { dental:'מרפאת שיניים', salon:'מספרה / ברבר', dog:'מספרת כלבים', garage:'מוסך', play:'משחקייה', event:'אולם אירועים', aesthetic:'אסתטיקה' };
+const TYPES = {
+  dental:'מרפאת שיניים', clinic:'מרפאה / קליניקה', aesthetic:'קוסמטיקה ואסתטיקה', spa:'ספא / עיסוי', nails:'מניקור / פדיקור',
+  salon:'מספרה / ברבר', dog:'טיפוח כלבים', vet:'וטרינר',
+  garage:'מוסך', carwash:'שטיפת רכב', tires:'צמיגים / פנצ׳ר',
+  restaurant:'מסעדה', cafe:'בית קפה', bakery:'מאפייה / קונדיטוריה', fastfood:'מזון מהיר / טייק אווי', bar:'בר / פאב', catering:'קייטרינג',
+  grocery:'מכולת / סופרמרקט', butcher:'אטליז', greengrocer:'ירקן', pharmacy:'בית מרקחת',
+  clothing:'אופנה / בגדים', shoes:'נעליים', jewelry:'תכשיטים ושעונים', toys:'צעצועים', gifts:'מתנות',
+  electronics:'חשמל ואלקטרוניקה', phones:'סלולר / תיקון טלפונים', computers:'מחשבים', optics:'אופטיקה ומשקפיים',
+  hardware:'חומרי בניין / טמבוריה', paint:'צבעים', furniture:'רהיטים', homegoods:'כלי בית ועיצוב', florist:'פרחים',
+  gym:'חדר כושר', studio:'סטודיו (יוגה/פילאטיס)', kindergarten:'גן ילדים / פעוטון', play:'משחקייה', school:'חוגים / לימודים',
+  realestate:'תיווך נדל״ן', lawyer:'עורך דין', accountant:'רואה חשבון / יועץ מס', insurance:'ביטוח ופיננסים',
+  electrician:'חשמלאי', plumber:'אינסטלטור', renovation:'שיפוצים / קבלן', ac:'טכנאי מזגנים', appliance:'טכנאי מוצרי חשמל', locksmith:'מנעולן',
+  gardening:'גינון', pestcontrol:'הדברה', moving:'הובלות', cleaning:'ניקיון',
+  photography:'צילום', print:'דפוס / גרפיקה', event:'אולם / הפקת אירועים', travel:'סוכנות נסיעות', laundry:'מכבסה', driving:'בית ספר לנהיגה',
+  other:'אחר / עסק כללי'
+};
 const HEB_M = ['ינו׳','פבר׳','מרץ','אפר׳','מאי','יוני','יולי','אוג׳','ספט׳','אוק׳','נוב׳','דצמ׳'];
 
 const INK='#0a1c26', INK2='#0e2733', PETROL='#0b6f8e', TEAL='#0fa7a3', TEALL='#5fd6d2', GOLD='#c4a35a', STAR='#f5b50a', POS='#10936f', MUTED='#5f717b', LINE='#e4edf2';
@@ -167,10 +182,13 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
             <Src name="Google" val={googleCount} max={Math.max(1,googleCount)} color="#fff" border>
               <svg width="17" height="17" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.7 1.2 9.2 3.6l6.8-6.8C35.9 2.4 30.5 0 24 0 14.6 0 6.5 5.4 2.6 13.2l8 6.2C12.4 13.7 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M47 24.5c0-1.6-.2-3.1-.4-4.5H24v9h12.9c-.6 3-2.3 5.5-4.8 7.2l7.7 6c4.5-4.2 7.2-10.4 7.2-17.7z"/><path fill="#FBBC05" d="M10.5 28.6c-.5-1.5-.8-3-.8-4.6s.3-3.1.8-4.6l-8-6.2C.9 16.5 0 20.1 0 24s.9 7.5 2.6 10.8z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.7-6c-2.1 1.5-4.9 2.3-8.2 2.3-6.3 0-11.6-4.2-13.5-9.9l-8 6.2C6.5 42.6 14.6 48 24 48z"/></svg>
             </Src>
-            {business.pro_url && business.pro_consent &&
-              <Src name="המקצוענים" val={business.pro_reviews_count||0} max={Math.max(1,business.pro_reviews_count||0,googleCount)} color={PETROL}>
-                <span style={{ color:'#fff', fontWeight:800, fontSize:12 }}>פ</span>
-              </Src>}
+            {(business.pro_url && business.pro_consent)
+              ? <Src name="המקצוענים" val={business.pro_reviews_count||0} max={Math.max(1,business.pro_reviews_count||0,googleCount)} color={PETROL}>
+                  <span style={{ color:'#fff', fontWeight:800, fontSize:12 }}>פ</span>
+                </Src>
+              : <Src name="המקצוענים" soonLabel="הוסף קישור בהגדרות" color={PETROL}>
+                  <span style={{ color:'#fff', fontWeight:800, fontSize:12 }}>פ</span>
+                </Src>}
             <Src name="Facebook" soonLabel="בקרוב · שלב 2" color="#1877f2"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06C2 17 5.66 21.13 10.44 21.94v-7H7.9v-2.94h2.54V9.85c0-2.52 1.5-3.91 3.78-3.91 1.1 0 2.24.2 2.24.2v2.46H15.2c-1.24 0-1.63.78-1.63 1.57v1.89h2.78l-.44 2.94h-2.34v7C18.34 21.13 22 17 22 12.06"/></svg></Src>
             <Src name="Instagram" soonLabel="בקרוב · שלב 2" color="linear-gradient(135deg,#f09433,#bc1888)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="#fff" stroke="none"/></svg></Src>
             <p style={{ fontSize:12, color:MUTED, marginTop:14 }}>בשלב 2 נאחד גם פייסבוק ואינסטגרם — וכל תגובה, בכל ערוץ, תיספר כאן.</p>
