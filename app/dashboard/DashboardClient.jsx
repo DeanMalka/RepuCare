@@ -180,6 +180,29 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
           </div>
         </div>
 
+        {/* pro.co.il (המקצוענים) — read-only external source */}
+        {business.pro_url && business.pro_consent && (
+          <div style={{ ...panel, marginBottom:18 }} id="pro">
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8, flexWrap:'wrap', gap:8 }}>
+              <h3 style={h3}>המקצוענים {business.pro_rating!=null && <span style={{ color:STAR, fontWeight:800 }}>★ {Number(business.pro_rating).toFixed(2)}</span>} {business.pro_reviews_count!=null && <span style={{ fontSize:12.5, color:MUTED, fontWeight:500 }}>· {business.pro_reviews_count} ביקורות</span>}</h3>
+              <div style={{ display:'flex', gap:8 }}>
+                <a style={ghost} href={business.pro_url} target="_blank" rel="noreferrer">פתח פרופיל ↗</a>
+                <button style={ghost} disabled={busy} onClick={async()=>{ const r=await post('/api/pro'); if(r&&r.ok) router.refresh(); else alert((r&&r.error)||'שגיאה ברענון'); }}>רענן</button>
+              </div>
+            </div>
+            <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'4px 0 14px' }}/>
+            {(business.pro_reviews&&business.pro_reviews.length)
+              ? business.pro_reviews.slice(0,5).map((rv,i)=>(
+                  <div key={i} style={{ padding:'11px 0', borderBottom:'1px solid '+LINE }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:8 }}><span style={{ fontWeight:600, fontSize:14 }}>{rv.author||'לקוח'}</span><span style={{ color:STAR, fontSize:13 }}>{stars(rv.rating)}</span><span style={{ color:MUTED, fontSize:11.5, marginInlineStart:'auto' }}>{rv.date||''}</span></div>
+                    {rv.body && <div style={{ color:'#43525b', fontSize:13.5, marginTop:2 }}>{rv.body}</div>}
+                  </div>
+                ))
+              : <p style={{ color:MUTED, fontSize:13.5 }}>שמרת קישור ואישור — לחץ "רענן" כדי למשוך את הדירוג והביקורות מהמקצוענים.</p>}
+            <p style={{ fontSize:11.5, color:MUTED, marginTop:10 }}>מקור: פרופיל המקצוענים שלך (קריאה בלבד).{business.pro_fetched_at? ' עודכן: '+new Date(business.pro_fetched_at).toLocaleDateString('he-IL') : ''}</p>
+          </div>
+        )}
+
         {/* reviews + private feedback */}
         <div className="rc-2col" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:18, marginBottom:18 }}>
           <div style={panel} id="reviews">
@@ -329,7 +352,7 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
         <div style={{ ...panel, marginBottom:18 }} id="settings">
           <h3 style={h3}>הגדרות העסק</h3>
           <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'10px 0 16px' }}/>
-          <Settings business={business} onSave={async (b)=>{ const r=await post('/api/business', b, 'PATCH'); if(r.ok) router.refresh(); else alert(r.error||'שגיאה'); }} busy={busy} />
+          <Settings business={business} onSave={async (b)=>{ const r=await post('/api/business', b, 'PATCH'); if(!r.ok){ alert(r.error||'שגיאה'); return; } if(b.pro_url && b.pro_consent){ await post('/api/pro'); } router.refresh(); }} busy={busy} />
         </div>
 
         {/* subscription */}
@@ -429,6 +452,7 @@ function SendRequest({ onSend, busy }) {
 function Settings({ business, onSave, busy }) {
   const [name,setName]=useState(business.name||''); const [city,setCity]=useState(business.city||'');
   const [type,setType]=useState(business.business_type||'dental'); const [google,setGoogle]=useState(business.google_review_url||'');
+  const [pro,setPro]=useState(business.pro_url||''); const [proC,setProC]=useState(!!business.pro_consent);
   return (
     <div>
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
@@ -437,7 +461,15 @@ function Settings({ business, onSave, busy }) {
         <div><label style={{ fontSize:13, fontWeight:600, color:INK }}>סוג עסק</label><select style={inp} value={type} onChange={e=>setType(e.target.value)}>{Object.entries(TYPES).map(([k,v])=><option key={k} value={k}>{v}</option>)}</select></div>
         <div><label style={{ fontSize:13, fontWeight:600, color:INK }}>קישור ביקורת בגוגל</label><input style={{ ...inp, direction:'ltr', textAlign:'left' }} value={google} onChange={e=>setGoogle(e.target.value)} placeholder="https://g.page/r/..." /></div>
       </div>
-      <button style={btn} disabled={busy} onClick={()=>onSave({ name, city, business_type:type, google_review_url:google })}>שמור שינויים</button>
+      <div style={{ marginTop:6, paddingTop:12, borderTop:'1px solid '+LINE }}>
+        <label style={{ fontSize:13, fontWeight:600, color:INK }}>קישור פרופיל המקצוענים (pro.co.il) — אופציונלי</label>
+        <input style={{ ...inp, direction:'ltr', textAlign:'left' }} value={pro} onChange={e=>setPro(e.target.value)} placeholder="https://www.pro.co.il/.../business-id-..." />
+        <label style={{ display:'flex', gap:8, alignItems:'flex-start', fontSize:12.5, color:MUTED, cursor:'pointer', marginTop:2 }}>
+          <input type="checkbox" checked={proC} onChange={e=>setProC(e.target.checked)} style={{ width:'auto', marginTop:3, flex:'none' }} />
+          <span>אני מאשר/ת שזהו עמוד העסק שלי במקצוענים, ושמותר ל‑RepuCare להציג ממנו דירוג וביקורות.</span>
+        </label>
+      </div>
+      <button style={btn} disabled={busy} onClick={()=>onSave({ name, city, business_type:type, google_review_url:google, pro_url:pro, pro_consent:proC })}>שמור שינויים</button>
     </div>
   );
 }
