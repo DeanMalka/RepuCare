@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<script>/* Auth safety net: a Supabase magic-link code/token that lands on the root gets forwarded to the callback handler. */
+(function(){try{var s=location.search||'',h=location.hash||'';if((location.pathname==='/'||location.pathname==='')&&(/[?&](code|error|error_description)=/.test(s)||/access_token=/.test(h))){location.replace('/auth/callback'+s+h);}}catch(e){}})();</script>
 <title>RepuCare — מוניטין טוב מתחיל בלקוחות מרוצים</title>
 <meta name="description" content="RepuCare מביאה לעסק שלך יותר ביקורות 5★ בגוגל, על אוטומט — ותופסת לקוחות פחות מרוצים לפידבק פרטי לפני שזה הופך לביקורת פומבית. 45 יום חינם, בלי דמי הקמה.">
 <meta property="og:title" content="RepuCare — מוניטין טוב מתחיל בלקוחות מרוצים">
@@ -253,7 +255,7 @@ footer .brand{justify-content:center;margin-bottom:10px}
     <div class="cmp reveal d1">
       <div class="rowc head"><div></div><div class="us">RepuCare</div><div>Podium / Birdeye</div></div>
       <div class="rowc"><div>תקופת ניסיון חינם</div><div class="us tick">45 יום · בלי כרטיס</div><div>14 יום / אין ניסיון</div></div>
-      <div class="rowc"><div>מחיר חודשי</div><div class="us">₪349</div><div>₪1,100–2,900</div></div>
+      <div class="rowc"><div>מחיר חודשי</div><div class="us">₪300 + מע״מ</div><div>₪1,100–2,900</div></div>
       <div class="rowc"><div>דמי הקמה</div><div class="us tick">אין</div><div>₪1,100–5,500 (Birdeye)</div></div>
       <div class="rowc"><div>התחייבות</div><div class="us tick">חודש לחודש</div><div>חוזה שנתי + קנס ביטול</div></div>
       <div class="rowc"><div>עברית + תמיכה מקומית</div><div class="us tick">✓ מלא</div><div class="x">חלקי</div></div>
@@ -269,7 +271,7 @@ footer .brand{justify-content:center;margin-bottom:10px}
     <div class="pcard reveal d1">
       <span class="ribbon">הצעת פיילוט · מקומות מוגבלים</span>
       <div class="amt">45 יום חינם</div>
-      <div class="setup">ואז ₪349 לחודש · או ₪3,560 לשנה <b style="color:#c4a35a">(15% הנחה — חיסכון ₪628)</b> · בלי דמי הקמה · בלי התחייבות</div>
+      <div class="setup">ואז ₪300 + מע״מ לחודש · או ₪3,060 + מע״מ לשנה <b style="color:#c4a35a">(15% הנחה — חיסכון ₪540)</b> · בלי דמי הקמה · בלי התחייבות</div>
       <ul class="check">
         <li>בקשת ביקורת אוטומטית (QR + הודעה)</li>
         <li>ניתוב חכם: מרוצים לגוגל, פידבק פרטי בנפרד</li>
@@ -286,7 +288,7 @@ footer .brand{justify-content:center;margin-bottom:10px}
   <div class="wrap" style="max-width:780px">
     <div class="sec-head reveal" style="text-align:center;margin:0 auto 40px"><span class="eyebrow">שאלות</span><h2>שאלות נפוצות</h2></div>
     <div class="reveal">
-      <details open><summary>איך עובד החודש וחצי החינם?</summary><p>45 יום מלאים, בלי תשלום ובלי התחייבות. אנחנו מקימים הכול ומתחילים להביא ביקורות — ואם בסוף התקופה זה לא שיפר לכם כלום, פשוט לא ממשיכים. אחרי כן ₪349 לחודש, ביטול בכל עת.</p></details>
+      <details open><summary>איך עובד החודש וחצי החינם?</summary><p>45 יום מלאים, בלי תשלום ובלי התחייבות. אנחנו מקימים הכול ומתחילים להביא ביקורות — ואם בסוף התקופה זה לא שיפר לכם כלום, פשוט לא ממשיכים. אחרי כן ₪300 + מע״מ לחודש, ביטול בכל עת.</p></details>
       <details><summary>זה לא נחשב "לסנן" ביקורות שליליות?</summary><p>לא. אנחנו מבקשים מ<b>כל</b> הלקוחות, ומציעים ערוץ פידבק פרטי כשירות נוסף — בלי למנוע מאף אחד לכתוב בגוגל. זה תואם את מדיניות גוגל.</p></details>
       <details><summary>צריך להתקין משהו או ללמוד מערכת?</summary><p>לא. ההקמה אצלכם לוקחת כ-10 דקות ומשם הכול רץ אוטומטית. הצוות לא צריך לעשות דבר.</p></details>
       <details><summary>זה עובד לעסק כמו שלי?</summary><p>כן — RepuCare בנוי לעסקי שירות: מרפאות, מספרות, מוסכים, משחקיות, אולמות אירועים ועוד. המערכת מתאימה את עצמה לסוג העסק שלך.</p></details>
