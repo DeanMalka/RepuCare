@@ -58,7 +58,7 @@ function Ico({ d, s=19, stroke='currentColor' }) {
 function stars(v){ const n=Math.round(v||0); return '★★★★★'.slice(0,n)+'☆☆☆☆☆'.slice(0,5-n); }
 
 export default function DashboardClient({ email, isAdmin=false, business, feedback=[], requests=[], reviews=[], events=[], sub, appUrl, leads = [], customers = [] }) {
-  const router = useRouter();
+  const router = useRouter(); const [view,setView]=useState('dash'); const V=(x)=>view===x; const navTo=(x)=>(e)=>{e.preventDefault();setView(x);window.scrollTo(0,0);};
   const [busy, setBusy] = useState(false);
   async function post(url, body, method='POST') {
     setBusy(true);
@@ -122,13 +122,13 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
           <RcMark s={28}/>
         </div>
         <nav style={{ display:'flex', flexDirection:'column', gap:4 }}>
-          <a style={navA(true)} href="#top"><Ico d={I.grid}/> דשבורד</a>
-          <a style={navA(false)} href="#customers"><Ico d={I.send}/> לקוחות ושליחה</a>
-          <a style={navA(false)} href="#reviews"><Ico d={I.star}/> ביקורות</a>
-          <a style={navA(false)} href="#feedback"><Ico d={I.chat}/> פידבק פרטי {openFb>0 && <span style={{ marginInlineStart:'auto', background:'#e0913a', color:'#fff', fontSize:11, borderRadius:999, padding:'1px 7px' }}>{openFb}</span>}</a>
-          <a style={navA(false)} href="#reports"><Ico d={I.bars}/> דוחות</a>
-          <a style={navA(false)} href="#settings"><Ico d={I.gear}/> הגדרות</a>
-          {isAdmin && <a style={navA(false)} href="#leads"><Ico d={I.trend}/> לידים <span style={{ marginInlineStart:'auto', background:TEAL, color:'#fff', fontSize:11, borderRadius:999, padding:'1px 7px' }}>{leads.length}</span></a>}
+          <a onClick={navTo('dash')} style={navA(V('dash'))} href="#"><Ico d={I.grid}/> דשבורד</a>
+          <a onClick={navTo('customers')} style={navA(V('customers'))} href="#"><Ico d={I.send}/> לקוחות ושליחה</a>
+          <a onClick={navTo('reviews')} style={navA(V('reviews'))} href="#"><Ico d={I.star}/> ביקורות</a>
+          <a onClick={navTo('feedback')} style={navA(V('feedback'))} href="#"><Ico d={I.chat}/> פידבק פרטי {openFb>0 && <span style={{ marginInlineStart:'auto', background:'#e0913a', color:'#fff', fontSize:11, borderRadius:999, padding:'1px 7px' }}>{openFb}</span>}</a>
+          <a onClick={navTo('reports')} style={navA(V('reports'))} href="#"><Ico d={I.bars}/> דוחות</a>
+          <a onClick={navTo('settings')} style={navA(V('settings'))} href="#"><Ico d={I.gear}/> הגדרות</a>
+          {isAdmin && <a onClick={navTo('leads')} style={navA(V('leads'))} href="#"><Ico d={I.trend}/> לידים <span style={{ marginInlineStart:'auto', background:TEAL, color:'#fff', fontSize:11, borderRadius:999, padding:'1px 7px' }}>{leads.length}</span></a>}
         </nav>
         <div style={{ marginTop:'auto', background:'rgba(255,255,255,.05)', border:'1px solid rgba(255,255,255,.1)', borderRadius:14, padding:'12px 14px', fontSize:13 }}>
           <b style={{ display:'block', color:'#fff', fontSize:14 }}>{business.name}</b>
@@ -147,11 +147,12 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
           </div>
           <div style={{ display:'flex', alignItems:'center', gap:12 }}>
             <span style={{ fontSize:12.5, color:PETROL, background:'#fff', border:'1px solid #dcebf0', borderRadius:999, padding:'6px 14px', fontWeight:600 }}>{planLabel}</span>
-            <a style={btn} href="#customers"><Ico d={I.send} s={16} stroke="#fff"/> שלח בקשות</a>
+            <a style={btn} onClick={navTo('customers')} href="#"><Ico d={I.send} s={16} stroke="#fff"/> שלח בקשות</a>
             <button style={{ ...ghost }} onClick={logout}>יציאה</button>
           </div>
         </div>
 
+        {V('dash') && (
         <div className="rc-kpis" style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:14, marginBottom:18 }}>
           <Kpi icon={I.star} label="דירוג ממוצע" value={avgRating!=null? avgRating.toFixed(1) : '—'}
                extra={avgRating!=null ? <span style={{ color:STAR, fontSize:13, letterSpacing:1 }}>{stars(avgRating)}</span> : null}
@@ -163,7 +164,9 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
                delta={conversion!=null ? 'מתוך הבקשות' : 'יוצג אחרי בקשות'} flat />
           <Kpi icon={I.shield} label="נחסם מפומבי" value={caughtPrivate} delta="פידבק פרטי" flat />
         </div>
+        )}
 
+        {V('dash') && (
         <div className="rc-2col" style={{ display:'grid', gridTemplateColumns:'1.5fr 1fr', gap:18, marginBottom:18 }}>
           <div style={panel}>
             <div style={{ marginBottom:8 }}><h3 style={h3}>פעילות ודירוג</h3><div style={{ color:MUTED, fontSize:12.5 }}>6 חודשים אחרונים</div></div>
@@ -194,9 +197,10 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
             <p style={{ fontSize:12, color:MUTED, marginTop:14 }}>בשלב 2 נאחד גם פייסבוק ואינסטגרם — וכל תגובה, בכל ערוץ, תיספר כאן.</p>
           </div>
         </div>
+        )}
 
         {/* pro.co.il (המקצוענים) — read-only external source */}
-        {business.pro_url && business.pro_consent && (
+        {V('dash') && business.pro_url && business.pro_consent && (
           <div style={{ ...panel, marginBottom:18 }} id="pro">
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8, flexWrap:'wrap', gap:8 }}>
               <h3 style={h3}>המקצוענים {business.pro_rating!=null && <span style={{ color:STAR, fontWeight:800 }}>★ {Number(business.pro_rating).toFixed(2)}</span>} {business.pro_reviews_count!=null && <span style={{ fontSize:12.5, color:MUTED, fontWeight:500 }}>· {business.pro_reviews_count} ביקורות</span>}</h3>
@@ -218,6 +222,7 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
           </div>
         )}
 
+        {(V('reviews')||V('feedback')) && (
         <div className="rc-2col" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:18, marginBottom:18 }}>
           <div style={panel} id="reviews">
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}><h3 style={h3}>ביקורות גוגל אחרונות</h3></div>
@@ -254,7 +259,9 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
             ))}
           </div>
         </div>
+        )}
 
+        {V('dash') && (
         <div style={{ ...panel, marginBottom:18 }} id="share">
           <h3 style={h3}>קישור הדירוג שלך</h3>
           <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'10px 0 16px' }}/>
@@ -265,21 +272,27 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
           </div>
           <p style={{ fontSize:12.5, color:MUTED, marginTop:10 }}>תלו את ה‑QR בעסק או שלחו את הקישור ללקוחות אחרי השירות. דירוג גבוה → גוגל, נמוך → פידבק פרטי אליכם.</p>
         </div>
+        )}
 
         {/* customers + bulk send */}
+        {V('customers') && (
         <div style={{ ...panel, marginBottom:18 }} id="customers">
           <h3 style={h3}>לקוחות ושליחה מרוכזת</h3>
           <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'10px 0 16px' }}/>
           <Customers customers={customers} post={post} router={router} busy={busy} />
         </div>
+        )}
 
         {/* single send request */}
+        {V('customers') && (
         <div style={{ ...panel, marginBottom:18 }} id="send">
           <h3 style={h3}>שליחת בקשה ללקוח בודד</h3>
           <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'10px 0 16px' }}/>
           <SendRequest onSend={async (b)=>{ const r=await post('/api/requests', b); if(r.ok) router.refresh(); else alert(r.error||'שגיאה'); return r; }} busy={busy} />
         </div>
+        )}
 
+        {V('reports') && (
         <div style={{ ...panel, marginBottom:18 }} id="reports">
           <h3 style={h3}>תובנות מהסקר {surveyCount>0 && <span style={{ fontSize:12, color:MUTED, fontWeight:500 }}>· {surveyCount} תשובות</span>}</h3>
           <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'10px 0 16px' }}/>
@@ -294,7 +307,9 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
                   </div> ); })}
               </div>}
         </div>
+        )}
 
+        {V('customers') && (
         <div style={{ ...panel, marginBottom:18 }} id="requests">
           <h3 style={h3}>בקשות אחרונות</h3>
           <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'10px 0 16px' }}/>
@@ -306,8 +321,9 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
             </div>
           ))}
         </div>
+        )}
 
-        {isAdmin && (
+        {V('leads') && isAdmin && (
           <div style={{ ...panel, marginBottom:18 }} id="leads">
             <h3 style={h3}>לידים נכנסים <span style={{ fontSize:11, color:'#fff', background:PETROL, borderRadius:999, padding:'2px 9px', marginInlineStart:6 }}>אדמין</span> {leads.length>0 && <span style={{ fontSize:12, color:'#fff', background:TEAL, borderRadius:999, padding:'2px 9px', marginInlineStart:6 }}>{leads.length}</span>}</h3>
             <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'10px 0 16px' }}/>
@@ -341,12 +357,15 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
           </div>
         )}
 
+        {V('settings') && (
         <div style={{ ...panel, marginBottom:18 }} id="settings">
           <h3 style={h3}>הגדרות העסק</h3>
           <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'10px 0 16px' }}/>
           <Settings business={business} onSave={async (b)=>{ const r=await post('/api/business', b, 'PATCH'); if(!r.ok){ alert(r.error||'שגיאה'); return; } if(b.pro_url && b.pro_consent){ await post('/api/pro'); } router.refresh(); }} busy={busy} />
         </div>
+        )}
 
+        {V('dash') && (
         <div style={{ ...panel, textAlign:'center', background:'linear-gradient(135deg,#0b2330,'+PETROL+')', border:'none' }}>
           {sub && (sub.status==='trialing'||sub.status==='active')
             ? <p style={{ color:'#eafbf6', fontWeight:700, fontSize:15 }}>המנוי פעיל ✓ — {planLabel}</p>
@@ -356,6 +375,7 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
                 <button style={{ ...btn, background:'#fff', color:PETROL }} disabled={busy} onClick={async()=>{ const r=await post('/api/checkout'); if(r.url) window.location.href=r.url; else alert(r.error||'שגיאה'); }}>הפעל מנוי (45 יום חינם)</button>
               </>}
         </div>
+        )}
 
         <p style={{ textAlign:'center', color:'#9fb0b8', fontSize:12, marginTop:18 }}>RepuCare · ניהול מוניטין לעסקי שירות</p>
       </main>
