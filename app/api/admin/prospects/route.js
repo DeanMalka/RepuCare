@@ -72,3 +72,16 @@ export async function POST(req) {
   }
   return NextResponse.json({ ok: true, found: rows.length, inserted });
 }
+
+export async function GET(req) {
+  const url = new URL(req.url);
+  const SECRET = process.env.PROSPECTS_SECRET || process.env.WHATSAPP_VERIFY_TOKEN || '';
+  if (!SECRET || url.searchParams.get('secret') !== SECRET) return new Response('forbidden', { status: 403 });
+  const { data } = await admin().from('prospects').select('type,city,name,rating,reviews,phone,segment').limit(5000);
+  const order = { 'דירוג נמוך (כאב)': 1, 'ליבה ICP (3.8–4.4)': 2, 'מעט/ללא ביקורות (פוטנציאל)': 3, 'דירוג גבוה (עדיפות נמוכה)': 4 };
+  const rows = (data || []).sort((a,b)=> String(a.type).localeCompare(String(b.type),'he') || ((order[a.segment]||9)-(order[b.segment]||9)) || ((b.reviews||0)-(a.reviews||0)));
+  const esc = v => { v = v==null?'':String(v); return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; };
+  const header = 'סוג עסק,עיר,שם העסק,דירוג,מס׳ ביקורות,אתר,טלפון,סגמנט,הערה,סטטוס פנייה';
+  const body = [header].concat(rows.map(r => [r.type,r.city,r.name,(r.rating==null?'':r.rating),(r.reviews==null?'':r.reviews),'',r.phone||'',r.segment,'Google',''].map(esc).join(','))).join('\n');
+  return new Response('\ufeff'+body, { status: 200, headers: { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': 'attachment; filename=krayot-prospects.csv' } });
+}
