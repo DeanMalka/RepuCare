@@ -74,7 +74,7 @@ export async function POST(req) {
   const targets = (customers || []).filter(c => c.phone && !c.do_not_contact);
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://repucare.co.il';
-  const link = appUrl + '/r/' + biz.rating_token;
+  // per-customer visit link → private feedback becomes attributable (see /api/visit)
   const channel = biz.send_channel || 'whatsapp';
   const sender = resolveSender(biz);
 
@@ -82,6 +82,7 @@ export async function POST(req) {
   for (const c of targets) {
     let status = 'queued', provider_msg_id = null, error = null;
     if (sender) {
+      const link = appUrl + '/api/visit?c=' + encodeURIComponent(c.id) + '&t=' + biz.rating_token;
       const r = await sendWhatsApp(sender, c.phone, c.name, biz.name, link);
       if (r.error) { status = 'failed'; error = String(r.error).slice(0, 300); failed++; }
       else { status = 'sent'; provider_msg_id = r.id; sent++; }
