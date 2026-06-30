@@ -1,4 +1,5 @@
 import { serverClient } from '../../../../lib/supabaseServer';
+import { admin } from '../../../../lib/supabase';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
@@ -62,5 +63,12 @@ export async function POST(req) {
       });
     }
   }
-  return NextResponse.json({ ok: true, count: rows.length, rows });
+  let inserted = 0;
+  if (rows.length) {
+    const payload = rows.map(r => ({ type: r.type, city: r.city, name: r.name, rating: r.rating, reviews: r.reviews, phone: r.phone, website: r.website, segment: r.segment, source: 'google' }));
+    const { error, count } = await admin().from('prospects').upsert(payload, { onConflict: 'name,city,type', ignoreDuplicates: true, count: 'exact' });
+    if (!error) inserted = count == null ? payload.length : count;
+    else return NextResponse.json({ ok: false, found: rows.length, db_error: String(error.message || error).slice(0, 200) });
+  }
+  return NextResponse.json({ ok: true, found: rows.length, inserted });
 }
