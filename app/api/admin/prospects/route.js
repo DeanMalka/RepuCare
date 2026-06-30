@@ -47,10 +47,11 @@ export async function POST(req) {
   for (const c of cats) {
     for (const city of cities) {
       const results = await textSearch(`${c.keyword} ${city}`, key);
-      for (const r of results.slice(0, perCity)) {
-        if (!r.place_id || seen.has(r.place_id)) continue;
-        seen.add(r.place_id);
-        const d = await details(r.place_id, key);
+      const slice = results.slice(0, perCity).filter(r => r.place_id && !seen.has(r.place_id));
+      slice.forEach(r => seen.add(r.place_id));
+      const ds = await Promise.all(slice.map(r => details(r.place_id, key)));
+      slice.forEach((r, i) => {
+        const d = ds[i] || {};
         const rating = d.rating != null ? d.rating : (r.rating != null ? r.rating : null);
         const count = d.user_ratings_total != null ? d.user_ratings_total : (r.user_ratings_total != null ? r.user_ratings_total : null);
         rows.push({
@@ -58,7 +59,7 @@ export async function POST(req) {
           rating, reviews: count, phone: d.formatted_phone_number || '',
           website: d.website || '', segment: segment(rating, count),
         });
-      }
+      });
     }
   }
   return NextResponse.json({ ok: true, count: rows.length, rows });
