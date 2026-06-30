@@ -8,6 +8,15 @@ export async function POST(req) {
   const { data: biz } = await supa.from('businesses').select('id,google_review_url').eq('rating_token', token).maybeSingle();
   if (!biz) return NextResponse.json({ error: 'not found' }, { status: 404 });
 
+  // Attribute to the specific customer (from the per-customer visit cookie), if present.
+  let cust = null;
+  const cm = (req.headers.get('cookie') || '').match(/(?:^|;\s*)rc_cust=([^;]+)/);
+  const custId = cm ? decodeURIComponent(cm[1]) : null;
+  if (custId && /^[0-9a-f-]{36}$/i.test(custId)) {
+    const { data } = await supa.from('customers').select('id,name,phone').eq('id', custId).eq('business_id', biz.id).maybeSingle();
+    if (data) cust = data;
+  }
+
   const s = survey || {};
   const c = (v) => { const n = parseInt(v, 10); return n >= 1 && n <= 5 ? n : null; };
 
@@ -20,6 +29,9 @@ export async function POST(req) {
     q_staff: c(s.staff),
     q_value: c(s.value),
     q_timeliness: c(s.timeliness),
+    customer_id: cust ? cust.id : null,
+    customer_name: cust ? cust.name : null,
+    customer_phone: cust ? cust.phone : null,
   });
   await supa.from('events_log').insert({ business_id: biz.id, type: 'feedback', meta: { rating, survey: s } });
 
