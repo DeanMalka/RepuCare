@@ -30,7 +30,13 @@ function GoogleIcon() {
 }
 
 export default function Login() {
-  const [mode, setMode] = useState('login'); // 'login' | 'signup'
+  const [mode, setMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search);
+      if (p.get('signup') === '1' || window.location.hash === '#signup') return 'signup';
+    }
+    return 'login';
+  }); // 'login' | 'signup'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [err, setErr] = useState('');
