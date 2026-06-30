@@ -39,6 +39,7 @@ export default function Login() {
   const [sentMagic, setSentMagic] = useState(false);
 
   const redirectTo = (typeof window !== 'undefined' ? window.location.origin : '') + '/auth/callback';
+  const showGoogle = process.env.NEXT_PUBLIC_GOOGLE_AUTH === '1';
 
   async function submit(e) {
     e.preventDefault();
@@ -90,12 +91,14 @@ export default function Login() {
         <div style={tab(mode==='signup')} onClick={()=>{ setMode('signup'); setErr(''); setNote(''); }}>הרשמה</div>
       </div>
 
+      {showGoogle && (<>
       <button style={{ ...gbtn, opacity: busy?0.7:1 }} onClick={google} disabled={busy}><GoogleIcon/> המשך עם Google</button>
       <div style={{ display:'flex', alignItems:'center', gap:10, margin:'16px 0' }}>
         <div style={{ flex:1, height:1, background:'#eef3f6' }}/>
         <span style={{ fontSize:12, color:'#9aa9b1' }}>או</span>
         <div style={{ flex:1, height:1, background:'#eef3f6' }}/>
       </div>
+      </>)}
 
       <form onSubmit={submit}>
         <label style={{ fontWeight:600, fontSize:14, color:'#15242c' }}>אימייל</label>
