@@ -192,7 +192,7 @@ footer .brand{justify-content:center;margin-bottom:10px}
       <p class="supp">מערכת פשוטה וחכמה לניהול המוניטין, שיפור השירות והגדלת האמון בעסק — בלי עומס על הצוות ובלי התחייבות.</p>
       <div class="cta">
         <a href="#audit" class="btn btn-primary">קבל בדיקת מוניטין חינם</a>
-        <a href="https://wa.me/972544773073?text=%D7%94%D7%99%2C%20%D7%A8%D7%95%D7%A6%D7%94%20%D7%91%D7%93%D7%99%D7%A7%D7%AA%20%D7%9E%D7%95%D7%A0%D7%99%D7%98%D7%99%D7%9F" class="btn btn-ghost">דברו בוואטסאפ</a>
+        <a href="https://wa.me/972537351121?text=%D7%94%D7%99%2C%20%D7%A8%D7%95%D7%A6%D7%94%20%D7%91%D7%93%D7%99%D7%A7%D7%AA%20%D7%9E%D7%95%D7%A0%D7%99%D7%98%D7%99%D7%9F" class="btn btn-ghost">דברו בוואטסאפ</a>
       </div>
       <div style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap">
         <span class="chip"><span class="s">✦</span> 45 יום חינם</span>
@@ -319,7 +319,7 @@ footer .brand{justify-content:center;margin-bottom:10px}
         <div style="margin-top:16px"><button class="btn btn-primary" type="submit" style="width:100%">שלחו לי בדיקת מוניטין חינם</button></div>
         <p class="formnote">בלחיצה אתם מאשרים יצירת קשר חד-פעמית בנוגע לבדיקה. לא יישלח דיוור פרסומי ללא הסכמה.</p>
       </form>
-      <p style="text-align:center;margin-top:18px"><a href="https://wa.me/972544773073" class="btn btn-wa">או דברו איתנו עכשיו בוואטסאפ</a></p>
+      <p style="text-align:center;margin-top:18px"><a href="https://wa.me/972537351121" class="btn btn-wa">או דברו איתנו עכשיו בוואטסאפ</a></p>
     </div>
   </div>
 </section>
@@ -336,7 +336,7 @@ footer .brand{justify-content:center;margin-bottom:10px}
   </div>
 </footer>
 
-<div class="mcta"><a href="#audit" class="btn btn-primary" style="min-height:46px">בדיקת מוניטין חינם</a><a href="https://wa.me/972544773073" class="btn btn-wa" style="min-height:46px">וואטסאפ</a></div>
+<div class="mcta"><a href="#audit" class="btn btn-primary" style="min-height:46px">בדיקת מוניטין חינם</a><a href="https://wa.me/972537351121" class="btn btn-wa" style="min-height:46px">וואטסאפ</a></div>
 
 <script>
 var nav=document.getElementById('nav');
@@ -373,7 +373,7 @@ if(mock&&matchMedia('(pointer:fine)').matches&&!matchMedia('(prefers-reduced-mot
   var f=document.querySelector('#audit form'); if(!f) return;
   var wrap=f.closest('.formwrap');
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
-  function waLink(name){var m=encodeURIComponent('היי, ראיתי את בדיקת המוניטין של RepuCare ל"'+(name||'')+'" ואני רוצה להתחיל את 45 הימים חינם.');return 'https://wa.me/972544773073?text='+m;}
+  function waLink(name){var m=encodeURIComponent('היי, ראיתי את בדיקת המוניטין של RepuCare ל"'+(name||'')+'" ואני רוצה להתחיל את 45 הימים חינם.');return 'https://wa.me/972537351121?text='+m;}
   function render(rep,name){
     var h='<div class="report-card"><div style="text-align:center;margin-bottom:6px"><span class="eyebrow gold">בדיקת מוניטין · RepuCare</span><h3 style="margin:8px 0 0;font-size:23px;color:#0a1c26">'+esc(rep.businessName)+'</h3>'+(rep.address?'<p style="margin:4px 0 0;font-size:13px;color:#90a1a9">'+esc(rep.address)+'</p>':'')+'</div>';
     (rep.sections||[]).forEach(function(s){
@@ -397,7 +397,7 @@ if(mock&&matchMedia('(pointer:fine)').matches&&!matchMedia('(prefers-reduced-mot
       .catch(function(){
         if(btn){btn.disabled=false;btn.textContent=old;}
         var parts=[];Object.keys(data).forEach(function(k){if(data[k])parts.push(k+': '+data[k]);});
-        window.location.href='https://wa.me/972544773073?text='+encodeURIComponent('היי! מעוניין/ת בבדיקת מוניטין חינם של RepuCare.\n'+parts.join('\n'));
+        window.location.href='https://wa.me/972537351121?text='+encodeURIComponent('היי! מעוניין/ת בבדיקת מוניטין חינם של RepuCare.\n'+parts.join('\n'));
       });
   });
 })();
