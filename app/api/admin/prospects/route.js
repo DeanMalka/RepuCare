@@ -27,15 +27,17 @@ async function details(pid, key) {
 }
 
 export async function POST(req) {
+  const body = await req.json().catch(() => ({}));
   const supa = serverClient();
   const { data: { user } } = await supa.auth.getUser();
-  if (!user || !ADMIN.includes((user.email || '').toLowerCase())) {
+  const isAdmin = !!user && ADMIN.includes((user.email || '').toLowerCase());
+  const SECRET = process.env.PROSPECTS_SECRET || process.env.WHATSAPP_VERIFY_TOKEN || '';
+  const okSecret = !!SECRET && body.secret === SECRET;
+  if (!isAdmin && !okSecret) {
     return NextResponse.json({ error: 'forbidden' }, { status: 403 });
   }
   const key = process.env.GOOGLE_PLACES_API_KEY;
   if (!key) return NextResponse.json({ error: 'no_places_key' }, { status: 500 });
-
-  const body = await req.json().catch(() => ({}));
   const cats = Array.isArray(body.categories) ? body.categories : [];      // [{label, keyword}]
   const cities = Array.isArray(body.cities) ? body.cities : [];
   const perCity = Math.min(Number(body.perCity) || 8, 20);
