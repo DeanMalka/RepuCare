@@ -124,8 +124,7 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
         <nav style={{ display:'flex', flexDirection:'column', gap:4 }}>
           <a onClick={navTo('dash')} style={navA(V('dash'))} href="#"><Ico d={I.grid}/> דשבורד</a>
           <a onClick={navTo('customers')} style={navA(V('customers'))} href="#"><Ico d={I.send}/> לקוחות ושליחה</a>
-          <a onClick={navTo('reviews')} style={navA(V('reviews'))} href="#"><Ico d={I.star}/> ביקורות</a>
-          <a onClick={navTo('feedback')} style={navA(V('feedback'))} href="#"><Ico d={I.chat}/> פידבק פרטי {openFb>0 && <span style={{ marginInlineStart:'auto', background:'#e0913a', color:'#fff', fontSize:11, borderRadius:999, padding:'1px 7px' }}>{openFb}</span>}</a>
+          <a onClick={navTo('reviews')} style={navA(V('reviews'))} href="#"><Ico d={I.star}/> ביקורות ופידבק {openFb>0 && <span style={{ marginInlineStart:'auto', background:'#e0913a', color:'#fff', fontSize:11, borderRadius:999, padding:'1px 7px' }}>{openFb}</span>}</a>
           <a onClick={navTo('reports')} style={navA(V('reports'))} href="#"><Ico d={I.bars}/> דוחות</a>
           <a onClick={navTo('settings')} style={navA(V('settings'))} href="#"><Ico d={I.gear}/> הגדרות</a>
           {isAdmin && <a onClick={navTo('leads')} style={navA(V('leads'))} href="#"><Ico d={I.trend}/> לידים <span style={{ marginInlineStart:'auto', background:TEAL, color:'#fff', fontSize:11, borderRadius:999, padding:'1px 7px' }}>{leads.length}</span></a>}
@@ -222,7 +221,7 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
           </div>
         )}
 
-        {(V('reviews')||V('feedback')) && (
+        {V('reviews') && (
         <div className="rc-2col" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:18, marginBottom:18 }}>
           <div style={panel} id="reviews">
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}><h3 style={h3}>ביקורות גוגל אחרונות</h3></div>
@@ -250,7 +249,7 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
                 <span style={{ width:9, height:9, borderRadius:'50%', marginTop:6, flex:'none', background: f.status==='new'?'#e0913a':POS }}/>
                 <div style={{ flex:1 }}>
                   <div style={{ fontSize:13.5, color:'#3a4750', lineHeight:1.5 }}>{f.body || '(ללא טקסט)'} {f.rating?<span style={{ color:GOLD, fontWeight:700 }}>· {f.rating}★</span>:''}</div>
-                  <div style={{ color:MUTED, fontSize:11.5, marginTop:3 }}>אנונימי · {new Date(f.created_at).toLocaleDateString('he-IL')}</div>
+                  <div style={{ color:MUTED, fontSize:11.5, marginTop:3 }}>{(f.customer_name||f.customer_phone) ? <>{f.customer_name||'לקוח'}{f.customer_phone && <> · <a href={'https://wa.me/'+String(f.customer_phone).replace(/[^\d]/g,'')} target="_blank" rel="noreferrer" style={{ color:PETROL, fontWeight:700 }}>{f.customer_phone} ↗</a></>}</> : 'אנונימי'} · {new Date(f.created_at).toLocaleDateString('he-IL')}</div>
                 </div>
                 {f.status==='new'
                   ? <button style={{ ...ghost, padding:'4px 11px', fontSize:12 }} onClick={async()=>{ await post('/api/business',{markFeedback:f.id},'PATCH'); router.refresh(); }}>סמן כטופל</button>
