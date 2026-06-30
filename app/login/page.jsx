@@ -39,7 +39,7 @@ export default function Login() {
   const [sentMagic, setSentMagic] = useState(false);
 
   const redirectTo = (typeof window !== 'undefined' ? window.location.origin : '') + '/auth/callback';
-  const showGoogle = process.env.NEXT_PUBLIC_GOOGLE_AUTH === '1';
+  const showGoogle = true; // Google provider configured in Supabase
 
   async function submit(e) {
     e.preventDefault();
