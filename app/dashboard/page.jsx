@@ -15,7 +15,7 @@ export default async function Dashboard() {
   const isAdmin = !!user.email && ADMIN_EMAILS.includes(user.email.toLowerCase());
 
   const { data: biz } = await supa.from('businesses').select('*').eq('owner_id', user.id).maybeSingle();
-  let feedback = [], requests = [], sub = null, leads = [], reviews = [], events = [], customers = [];
+  let feedback = [], requests = [], sub = null, leads = [], reviews = [], events = [], customers = [], branches = [];
   if (biz) {
     const a = admin();
     feedback = (await a.from('feedback').select('*').eq('business_id', biz.id).order('created_at', { ascending: false }).limit(50)).data || [];
@@ -24,6 +24,7 @@ export default async function Dashboard() {
     events   = (await a.from('events_log').select('type,meta,created_at').eq('business_id', biz.id).order('created_at', { ascending: false }).limit(500)).data || [];
     sub = (await a.from('subscriptions').select('*').eq('business_id', biz.id).maybeSingle()).data || null;
     customers = (await a.from('customers').select('*').eq('business_id', biz.id).order('last_seen', { ascending: false, nullsFirst: false }).limit(1000)).data || [];
+    branches = (await a.from('branches').select('*').eq('business_id', biz.id).order('created_at', { ascending: true })).data || [];
     // Leads belong to RepuCare (you), not to the customer's tenant — admin-only.
     leads = isAdmin
       ? ((await a.from('leads').select('*').order('created_at', { ascending: false }).limit(200)).data || [])
@@ -40,6 +41,7 @@ export default async function Dashboard() {
     sub={sub}
     leads={leads}
     customers={customers}
+    branches={branches}
     appUrl={process.env.NEXT_PUBLIC_APP_URL || ''}
   />;
 }

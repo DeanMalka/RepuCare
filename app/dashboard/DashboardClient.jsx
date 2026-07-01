@@ -57,7 +57,7 @@ function Ico({ d, s=19, stroke='currentColor' }) {
 }
 function stars(v){ const n=Math.round(v||0); return '★★★★★'.slice(0,n)+'☆☆☆☆☆'.slice(0,5-n); }
 
-export default function DashboardClient({ email, isAdmin=false, business, feedback=[], requests=[], reviews=[], events=[], sub, appUrl, leads = [], customers = [] }) {
+export default function DashboardClient({ email, isAdmin=false, business, feedback=[], requests=[], reviews=[], events=[], sub, appUrl, leads = [], customers = [], branches = [] }) {
   const router = useRouter(); const [view,setView]=useState('dash'); const V=(x)=>view===x; const navTo=(x)=>(e)=>{e.preventDefault();setView(x);window.scrollTo(0,0);};
   const [busy, setBusy] = useState(false);
   async function post(url, body, method='POST') {
@@ -149,6 +149,7 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
           <a onClick={navTo('customers')} style={navA(V('customers'))} href="#"><Ico d={I.send}/> לקוחות ושליחה</a>
           <a onClick={navTo('reviews')} style={navA(V('reviews'))} href="#"><Ico d={I.star}/> ביקורות ופידבק {openFb>0 && <span style={{ marginInlineStart:'auto', background:'#e0913a', color:'#fff', fontSize:11, borderRadius:999, padding:'1px 7px' }}>{openFb}</span>}</a>
           <a onClick={navTo('reports')} style={navA(V('reports'))} href="#"><Ico d={I.bars}/> דוחות</a>
+          <a onClick={navTo('branches')} style={navA(V('branches'))} href="#"><Ico d={I.grid}/> סניפים</a>
           <a onClick={navTo('settings')} style={navA(V('settings'))} href="#"><Ico d={I.gear}/> הגדרות</a>
           {isAdmin && <a onClick={navTo('leads')} style={navA(V('leads'))} href="#"><Ico d={I.trend}/> לידים <span style={{ marginInlineStart:'auto', background:TEAL, color:'#fff', fontSize:11, borderRadius:999, padding:'1px 7px' }}>{leads.length}</span></a>}
         </nav>
@@ -338,6 +339,7 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
         )}
 
         {V('reports') && <BusinessReport business={business} avgRating={avgRating} allRatings={allRatings} requestsSent={requestsSent} conversion={conversion} caughtPrivate={caughtPrivate} SURVEY_Q={SURVEY_Q} surveyAvg={surveyAvg} surveyCount={surveyCount} />}
+        {V('branches') && <BranchesPanel branches={branches} appUrl={appUrl} />}
 
         {V('customers') && (
         <div style={{ ...panel, marginBottom:18 }} id="requests">
@@ -639,6 +641,76 @@ function Onboard({ onCreate, email, logout, busy }) {
         <div style={{ marginTop:12, fontSize:12, color:MUTED }}>{email} · <span style={{ cursor:'pointer', color:PETROL }} onClick={logout}>יציאה</span></div>
       </div>
     </main>
+  );
+}
+
+
+function BranchesPanel({ branches, appUrl }) {
+  const [list, setList] = useState(branches || []);
+  const [name, setName] = useState('');
+  const [city, setCity] = useState('');
+  const [gurl, setGurl] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState('');
+  const base = appUrl || (typeof window !== 'undefined' ? window.location.origin : '');
+  async function add(e) {
+    e.preventDefault();
+    if (!name.trim()) return;
+    setBusy(true); setMsg('');
+    try {
+      const r = await fetch('/api/branches', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, city, google_review_url: gurl }) });
+      const j = await r.json();
+      if (j.ok && j.branch) { setList((l) => [...l, j.branch]); setName(''); setCity(''); setGurl(''); }
+      else setMsg('שגיאה: ' + (j.error || 'לא ידוע'));
+    } catch (err) { setMsg('שגיאת רשת'); }
+    setBusy(false);
+  }
+  async function del(id) {
+    if (typeof window !== 'undefined' && !window.confirm('למחוק את הסניף? הנתונים שלו יימחקו.')) return;
+    const r = await fetch('/api/branches', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+    const j = await r.json();
+    if (j.ok) setList((l) => l.filter((b) => b.id !== id));
+  }
+  function copy(txt) { try { navigator.clipboard.writeText(txt); setMsg('הקישור הועתק'); setTimeout(() => setMsg(''), 1500); } catch (e) {} }
+  return (
+    <div style={{ ...panel, marginBottom: 18 }}>
+      <h2 style={{ fontSize: 20, fontWeight: 800, color: INK, marginBottom: 4 }}>סניפים</h2>
+      <p style={{ color: MUTED, fontSize: 13.5, marginBottom: 16 }}>לכל סניף קישור דירוג משלו — הביקורות והפידבק מתפצלים לפי סניף, ואפשר להפיק דוח נפרד לכל אחד.</p>
+      <form onSubmit={add} style={{ background: '#f7fbfc', border: '1px solid #e7f0f3', borderRadius: 14, padding: 16, marginBottom: 18 }}>
+        <div style={{ fontWeight: 700, color: INK, marginBottom: 10 }}>הוספת סניף</div>
+        <input style={inp} placeholder="שם הסניף (למשל: סניף חיפה)" value={name} onChange={(e) => setName(e.target.value)} />
+        <input style={inp} placeholder="עיר (אופציונלי)" value={city} onChange={(e) => setCity(e.target.value)} />
+        <input style={inp} placeholder="קישור לעמוד הביקורות בגוגל של הסניף (אופציונלי)" value={gurl} onChange={(e) => setGurl(e.target.value)} />
+        <button style={{ ...btn, opacity: busy ? 0.6 : 1 }} disabled={busy} type="submit">{busy ? 'מוסיף…' : '+ הוסף סניף'}</button>
+        {msg && <span style={{ marginInlineStart: 10, color: MUTED, fontSize: 13 }}>{msg}</span>}
+      </form>
+      {list.length === 0
+        ? <p style={{ color: MUTED, fontSize: 14 }}>עדיין אין סניפים. הוסיפו את הסניף הראשון למעלה — יתקבל קישור דירוג ייעודי שאפשר להדפיס כ-QR בעמדה.</p>
+        : <div style={{ display: 'grid', gap: 12 }}>
+            {list.map((b) => {
+              const link = base + '/r/' + b.rating_token;
+              return (
+                <div key={b.id} style={{ border: '1px solid ' + LINE, borderRadius: 14, padding: '14px 16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, flexWrap: 'wrap' }}>
+                    <div>
+                      <div style={{ fontWeight: 800, color: INK, fontSize: 16 }}>{b.name}</div>
+                      {b.city && <div style={{ color: MUTED, fontSize: 13 }}>{b.city}</div>}
+                      {b.google_rating != null && <div style={{ color: MUTED, fontSize: 13, marginTop: 2 }}>★ {Number(b.google_rating).toFixed(1)}{b.google_reviews_count != null ? ' · ' + b.google_reviews_count + ' ביקורות' : ''}</div>}
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      <a style={ghost} href={'/api/report-doc?branch=' + b.id} target="_blank" rel="noreferrer">📄 דוח</a>
+                      <button style={ghost} onClick={() => del(b.id)}>מחק</button>
+                    </div>
+                  </div>
+                  <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <code style={{ background: '#f2f7f9', border: '1px solid ' + LINE, borderRadius: 8, padding: '6px 10px', fontSize: 12.5, direction: 'ltr', maxWidth: '100%', overflow: 'auto' }}>{link}</code>
+                    <button style={ghost} onClick={() => copy(link)}>העתק קישור</button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>}
+    </div>
   );
 }
 
