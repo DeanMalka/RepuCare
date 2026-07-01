@@ -666,6 +666,14 @@ function BusinessReport({ business, avgRating, allRatings, requestsSent, convers
   const shareText = L.join('\n');
   const wa = 'https://wa.me/?text='+encodeURIComponent(shareText);
   const mail = 'mailto:?subject='+encodeURIComponent('דוח מצב מוניטין — '+(business.name||''))+'&body='+encodeURIComponent(shareText);
+  async function sendMail(){
+    try{
+      const r = await fetch('/api/report-send',{ method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' });
+      const j = await r.json().catch(()=>({}));
+      if (j && j.ok) { alert('הדוח נשלח למייל '+(j.to||'')); return; }
+      window.location.href = mail;
+    }catch(e){ window.location.href = mail; }
+  }
   const card = { background:'#f7fbfc', border:'1px solid #e7f0f3', borderRadius:14, padding:'14px 16px' };
   const big = { fontSize:26, fontWeight:800, color:INK, lineHeight:1, marginTop:4 };
   return (
@@ -678,8 +686,9 @@ function BusinessReport({ business, avgRating, allRatings, requestsSent, convers
         </div>
         <div className="rc-noprint" style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
           <button style={btn} onClick={()=>window.print()}>🖨 הורד / הדפס</button>
+          <a style={ghost} href="/api/report-doc" target="_blank" rel="noreferrer">📄 דוח PDF</a>
           <a style={ghost} href={wa} target="_blank" rel="noreferrer">💬 וואטסאפ</a>
-          <a style={ghost} href={mail}>✉️ מייל</a>
+          <button style={ghost} onClick={sendMail}>✉️ שלח למייל</button>
         </div>
       </div>
       <div style={{ height:1, background:'linear-gradient(90deg,transparent,rgba(196,163,90,.5),transparent)', margin:'14px 0 16px' }}/>
