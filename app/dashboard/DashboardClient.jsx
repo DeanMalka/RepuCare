@@ -87,6 +87,24 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
   const caughtPrivate = feedback.length;
   const openFb = feedback.filter(f=>f.status==='new').length;
   const ratingLink = (appUrl||'') + '/r/' + business.rating_token;
+  const qrImg = (px)=> 'https://api.qrserver.com/v1/create-qr-code/?size='+px+'x'+px+'&margin=12&data='+encodeURIComponent(ratingLink);
+  function printQrPoster(){
+    const w = window.open('', '_blank'); if(!w) return;
+    const name = String(business.name||'').replace(/</g,'&lt;');
+    w.document.write('<!doctype html><html dir="rtl" lang="he"><head><meta charset="utf-8"><title>QR — '+name+'</title>'
+      +'<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Rubik,system-ui,Arial,sans-serif;background:#fff;color:#0a1c26;display:flex;align-items:center;justify-content:center;min-height:100vh}'
+      +'.p{width:640px;max-width:92vw;text-align:center;padding:46px 40px;border:2px solid #e4edf2;border-radius:28px;box-shadow:0 30px 70px -40px rgba(10,40,52,.4)}'
+      +'.b{font-weight:800;font-size:34px;letter-spacing:-.02em;color:#0b6f8e}.s{font-size:20px;color:#5f717b;margin:10px 0 26px}'
+      +'.q{width:360px;height:360px;margin:0 auto;display:block}.c{margin-top:24px;font-size:21px;font-weight:700}.f{margin-top:22px;font-size:13px;color:#90a1a9}'
+      +'@media print{.p{border:none;box-shadow:none}}</style></head><body><div class="p">'
+      +'<div class="b">'+name+'</div><div class="s">סרקו ודרגו את החוויה שלכם ⭐</div>'
+      +'<img class="q" src="'+qrImg(1000)+'" alt="QR"/>'
+      +'<div class="c">מצלמת הטלפון ← סריקה ← דירוג ב-10 שניות</div>'
+      +'<div class="f">מופעל ע״י RepuCare</div></div>'
+      +'<script>var i=document.querySelector("img");i.onload=function(){setTimeout(function(){window.print()},350)};i.onerror=function(){window.print()};<\/script>'
+      +'</body></html>');
+    w.document.close();
+  }
   const planLabel = sub ? (sub.status==='trialing' ? 'בתקופת ניסיון (45 יום)' : sub.status==='active' ? 'מנוי פעיל' : sub.status) : 'ללא מנוי פעיל';
 
   const base = new Date(); base.setDate(1);
@@ -294,9 +312,10 @@ export default function DashboardClient({ email, isAdmin=false, business, feedba
           <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
             <input style={{ ...inp, marginBottom:0, flex:1, minWidth:240, direction:'ltr', textAlign:'left' }} readOnly value={ratingLink} />
             <button style={ghost} onClick={()=>{navigator.clipboard&&navigator.clipboard.writeText(ratingLink); alert('הקישור הועתק');}}>העתק</button>
-            <a style={btn} href={'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(ratingLink)} target="_blank" rel="noreferrer">קוד QR</a>
+            <a style={ghost} href={qrImg(400)} target="_blank" rel="noreferrer">קוד QR</a>
+            <button style={btn} onClick={printQrPoster}>🖨 הדפס שלט לעמדה</button>
           </div>
-          <p style={{ fontSize:12.5, color:MUTED, marginTop:10 }}>תלו את ה‑QR בעסק או שלחו את הקישור ללקוחות אחרי השירות. דירוג גבוה → גוגל, נמוך → פידבק פרטי אליכם.</p>
+          <p style={{ fontSize:12.5, color:MUTED, marginTop:10 }}>הדפיסו שלט QR לעמדה ותלו בעסק, או שלחו את הקישור ללקוחות אחרי השירות. דירוג גבוה → גוגל, נמוך → פידבק פרטי אליכם.</p>
         </div>
         )}
 
